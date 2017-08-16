@@ -1,0 +1,774 @@
+Two Pointers
+ 
+As far as I know:
+ 
+1. Two Pointers are favored in phone interviews. 
+    1) easy to illustrate and understand the question 
+    2) mostly medium difficulty 
+    3) easy to check the code
+    4) The code won't be too long
+ 
+2. Two Pointers could be counter-intuitive. However, after practice, they are easy to handle.
+ 
+ 
+Two Types of Two Pointers 
+1. the two pointers are used for manipulating the index
+ 
+2. the two pointers represent upper and lower bound of a window, (High chance we would also use HashTable to solve the problem)
+ 
+ 
+The signs that it may be a Two Pointers Question:
+1. 50% letting you return an int ( could be index, length, sum)， 0% ask you to return boolean. 30% ask you to return ranges or substring
+ 
+2. 90% of the two pointers questions are either given you String or Array(Because Pointers represent index, there are no index in Tree/ LinkedList/ Graph)
+  
+3. O(N) Time Complexity
+ 
+Type I
+ 
+// Add Two Numbers
+ 
+// You are given two non-empty linked lists representing two non-negative integers. The digits are stored in reverse order and each of their nodes contain a single digit. Add the two numbers and return it as a linked list.
+ 
+// You may assume the two numbers do not contain any leading zero, except the number 0 itself.
+ 
+// Input: (2 -> 4 -> 3) + (5 -> 6 -> 4)
+// Output: 7 -> 0 -> 8
+ 
+public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
+  ListNode dummy = new ListNode(0);
+  if (l1 == null && l2 == null) return dummy;
+  int sum = 0;
+  int carry = 0;
+  int mod = 0;
+  ListNode cur = dummy;
+  while (l1 != null || l2 != null) {
+    int num1 = l1 == null? 0: l1.val;
+    int num2 = l2 == null? 0: l2.val;
+    sum = num1 + num2 + carry;
+    carry = sum / 10;
+    mod = sum % 10;
+    cur.next = new ListNode(mod);
+    cur = cur.next;
+    l1 = l1 == null? null : l1.next;
+    l2 = l2 == null? null : l2.next;
+  }
+  if (carry != 0) {
+    cur.next = new ListNode(carry);
+  }
+  return dummy.next;
+}
+ 
+ 
+ 
+// Reverse Words in a String
+// Given an input string, reverse the string word by word.
+ 
+// For example,
+// Given s = "the sky is blue",
+// return "blue is sky the".
+ 
+ 
+ 
+ 
+public class Solution {
+    public String reverse(String s) {
+        String[] words = s.trim().split(" +");
+        StringBuilder result = new StringBuilder();
+        for (int i = words.length - 1; i >= 0; i--) {
+            result.append(words);
+            if (i != 0) result.append(" ");
+        }
+        return result.toString();
+    }
+}
+ 
+ 
+the sky is blue --> eulb si yks eht --> blue si yks eht --> blue is yks .....
+ 
+// Solution Two:
+// When the input is char[], we can decrease the space complexity to 0(1)
+// Time: O(n)
+// Space: O(1)
+ 
+public class Solution {
+    public void reverse(char[] s) {
+        reserseWords(s, 0, s.length - 1);
+        int start = 0;
+        for (int i = 0; i < s.length - 1; i++) {
+            if (s[i] == ' ') {
+                reserseWords(s, start, i - 1);
+                start = i + 1;
+            }
+        }
+    }
+    public void reserseWords(char[] s, int start, int end) {
+        while (start < end) {
+            char tmp = s[start];
+            s[start] = s[end];
+            s[end] = tmp;
+            start++;
+            end--;
+        }
+    }
+}
+ 
+ 
+ 
+// Remove Element
+// Given an array and a value, remove all instances of that value in place and return the new length
+// The order of elements can be changed. It doesn't matter what you leave beyongd the new length
+ 
+// 典型的数组里快慢指针问题，解决的精髓在于如果找到快指针动，慢指针不动记录当前要被换掉的位置，等块指针移动到legit的点时对慢指针所在点动手，然后快慢指针++
+ 
+                
+//[14 , 2 ,3 ,5 ,4, 4], val = 4 ==> [ 14, 2, 3, 5, 4, 4]
+               slow
+                   fast
+  
+ 
+public class Solution {
+    public int removeElement(int[] nums, int val) {
+        int fast = 0;
+        int slow = 0;
+        while (fast < nums.length) {
+            if (nums[fast] == val) {
+                fast++;
+            } else {
+                nums[slow] = nums[fast]
+                fast++;
+                slow++;
+            }
+        }
+        return slow;
+    }
+}
+ 
+ 
+ 
+ 
+// Remove Duplicates From Sorted Array
+// Similar to Last One
+ 
+ 
+[1, 2, 4 , 5 ,6 ,5, 6,]
+                slow
+                       fast
+ 
+ 
+public class Solution {
+    public int removeDuplicates(int[] nums) {
+            if (nums == null || nums.length == 0) return 0;
+        int slow = 1;
+        int fast = 1;
+        while (fast < nums.length) {
+            if (nums[fast] == nums[fast - 1]) {
+                fast++;
+            } else {
+                nums[slow] = nums[fast];
+                fast++;
+                slow++;
+            }
+        }
+        return slow;
+    }
+}
+ 
+ 
+/*
+Remove Duplicates from Sorted Array II
+Follow up for "Remove Duplicates": What if duplicates are allowed at most twice?
+ 
+For example, Given sorted array nums = [1,1,1,2,2,3],
+ 
+Your function should return length = 5, with the first five elements of nums being 1, 1, 2, 2 and 3. It doesn't matter what you leave beyond the new length.
+*/
+ 
+nums = [1,   1,   2,   2,   3,   3] ==> [1, 1, 2, 2, 3]
+                                    i
+                                idx
+   
+count:  1    2    3    1    2    1
+ 
+ 
+public int removeDulis(int[] nums) {
+  if (nums == null || nums.length == 0) return 0;
+  int idx = 0;
+  int cnt = 0;
+  for (int i = 0; i < nums.length; i++) {
+    if (i > 0 && nums[i] == nums[i-1]) {
+      cnt++;
+      if (cnt > 2) {
+        continue;
+      }
+    } else {
+      cnt = 1;
+    }
+    nums[idx] = nums[i];
+    idx++;
+  }
+  return idx;
+}
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+// Implement strStr().
+ 
+                  f                            j i               
+Haystack: a c c b c b d d e         Needle c b c b d ==> return 2
+              c b c b d              Needle  zd  ==> return -1
+ 
+next: [0  0  0  2  0]
+ 
+ 
+KMP算法中的next数组是找当前位置的最大相同前缀后缀的个数
+arr = " $ g e a b c d a b c "
+next =  0 0 0 0 0 0 0 1 2 3
+        j  
+          
+  
+how to build next array:
+int i = 1;
+int j = 0;
+int len = needle.length();
+while (i < len) {
+  if (needle.charAt(i) == needle.charAt(j)) next[++i] = ++j;
+  else if (j == 0) ++i;
+  else j = res[j];
+}
+ 
+http://blog.csdn.net/v_july_v/article/details/7041827  
+  
+public class Solution { //brute force
+    public int strStr(String haystack, String needle) {
+        int start = 0;
+        for (int i = 0; i < haystack.length() - needle.length(); i++) {
+            for (int j = 0; j < needle.length(); j++) {
+                if (haystack.charAt(i + j) != needle.charAt(j)) break;
+                if (j == needle.length() - 1) return i;
+            }
+        }
+        return -1;
+    }
+}
+ 
+// KMP
+// Time O(M*N)
+ 
+ 
+/*
+Sort Colors
+Given an array with n objects colored red, white or blue, sort them so that objects of the same color are adjacent, with the colors in the order red, white and blue.
+ 
+Here, we will use the integers 0, 1, and 2 to represent the color red, white, and blue respectively.
+*/
+Quicksort -> partition and iteration
+ 
+ p
+ 3  2  1  4  6  2   7  11  
+ lo
+ hi
+  
+[items <= p , p, items >= p]
+  
+  
+  [0,  0,  1 ,  1 , 2 , 2]
+          left
+               right
+                i        
+public void sortColors(int[] nums) {
+  int left = 0, right = nums.length - 1;
+  int i = 0;
+  while(i <= right){
+    // 遇到0交换到前面
+    if(nums[i] == 0){
+      swap(nums, i, left);
+      left++;
+      // 因为左边必定有序，所以可以直接i++
+      i++;
+      // 遇到2交换到后面
+    } else if(nums[i] == 2){
+      swap(nums, i, right);
+      right--;
+    } else {
+      // 遇到1跳过 
+      i++;
+    }
+  }
+}
+ 
+private void swap(int[] nums, int i1, int i2){
+  int tmp = nums[i1];
+  nums[i1] = nums[i2];
+  nums[i2] = tmp;
+}
+ 
+Type II
+ 
+/*Jump Game II
+ 
+难度 2
+ 
+Given an array of non-negative integers, you are initially positioned at the first index of the array.
+ 
+Each element in the array represents your maximum jump length at that position.
+ 
+Your goal is to reach the last index in the minimum number of jumps.
+ 
+For example: Given array A = [2,3,1,1,4]
+ 
+The minimum number of jumps to reach the last index is 2. (Jump 1 step from index 0 to 1, then 3 steps to the last index.)
+*/
+ 
+A = [2  ,  3,   1,  1  ,4  .... 9]
+     0     1    2,  3,  4  
+            curMostR
+                       right
+                  left
+Step             1       2
+public int minJump(int[] nums) {
+  int left = 0;
+  int right = 0;
+  int step = 0;
+  int curMostRright = 0;
+  while (right < nums.length - 1) {
+    curMostRight = right;
+    //  （ i < curMostRight）  这里需要用一个curMostRight原因是此for循环内right会变化，这样循环外面顺序会乱
+    for (int i = left; i <= curMostRight; i++) {
+      right = Math.max(right, i + nums[i]);
+    }
+    left = curMostRight + 1;
+    step++;
+  }
+  return step;
+}
+ 
+ 
+ 
+// Container With Most Water
+// 难度 2
+// Given n non-negative integers a1, a2, ..., an, where each represents a point at coordinate (i, ai). n vertical lines are drawn such that the two endpoints of line i is at (i, ai) and (i, 0). Find two lines, which together with x-axis forms a container, such that the containercontains the most water.
+ 
+ 
+[1 ,  3 ,  2 , 2 , 1]
+      |
+      |    |   |
+ |    |    |   |   |
+----------------------------
+public class Solution {
+    public int maxArea(int[] height) {
+        int left = 0, right = height.length - 1, maxArea = 0;
+        while(left < right){
+            // 每次更新最大面积（盛水量）
+            maxArea = Math.max(maxArea, Math.min(height[left], height[right]) * (right - left));
+            // 如果左边较低，则将左边向中间移一点
+            if(height[left] < height[right]){
+                left++;
+            // 如果右边较低，则将右边向中间移一点
+            } else {
+                right--;
+            }
+        }
+        return maxArea;
+    }
+}
+ 
+ 
+ 
+/*LongestSubstringWithAtMostTwoDistinctCharacters
+// 难度 3
+* Given a string, find the length of the longest substring T that contains at most k distinct characters.
+* 
+* For example, Given s = “eceba” and k = 2,
+* 
+* T is "ece" which its length is 3.
+*/
+                  f
+      e   e   e   b   a
+      s          
+                  f
+max:  1   2
+  
+set:  e  ec
+  
+  
+    a b c d e f
+    s
+               f
+    
+public int longestsubstring(String s) {
+  if (s == null || s.length() == 0) return 0;
+  Map<Character, Integer> map = new HashMap<Character, Integer>();
+  int left = 0;
+  int maxLen = 0;
+  for (int i = 0; i < s.length(); i++) {
+    char c = s.charAt(i);
+    if (!map.contains(c)) {
+      map.put(c, 1);
+    }
+    else {
+      map.put(c, map.get(c) + 1);
+    }
+    char leftC = s.charAt(left);
+    
+    if (map.size() <= 2) {
+      maxLen = Math.max(maxLen, i - left + 1);
+    } else {
+      while (map.size > 2) {
+        if (map.get(leftC) == 1) {
+          map.remove(leftC);
+        } else {
+          map.put(leftC, map.get(left) - 1);
+        }
+        left++;
+      }  
+    }
+  }
+  return maxLen;
+}
+ 
+  public int lengthOfLongestSubstringTwoDistinct(String s) {
+    if(s == null || s.length() == 0) return 0;
+    Map<Character, Integer> map = new HashMap<Character, Integer>();
+    int left = 0;
+    int maxLen = 0;
+    for (int i = 0; i < s.length(); i++) {
+      //update map based on current pointer i
+      char c = s.charAt(i);
+      if (!map.containsKey(c)) {
+        map.put(c, 1);
+      } else {
+        map.put(c, map.get(c)+1);
+      }
+    
+      // move left pointer until number of Character in map is less or equal to k
+      while (map.size() > k) {
+        char leftChar = s.charAt(left);
+        if (map.containsKey(leftChar)) {
+        // note that there may have duplications, so decrease the freq of this Char
+        // to zero before remove this Char 
+          map.put(leftChar, map.get(leftChar)-1);
+          if (map.get(leftChar) == 0) {
+            map.remove(leftChar);
+          }
+        }
+        left++;
+      }
+      maxLen = Math.max(maxLen, i-left+1);
+    }
+    return maxLen;
+  }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+/**
+LongestSubstringWithoutRepeatingCharacters
+* Given a string, find the length of the longest substring without repeating characters.
+* 
+* Examples:
+* 
+* Given " b  a  c  a  d e", the answer is "abc", which the length is 3.
+*              left
+                  right
+* Given "bbbbb", the answer is "b", with the length of 1.
+* 
+* Given "pwwkew", the answer is "wke", with the length of 3. Note that the answer must be a substring, "pwke" is a subsequence and not a substring.
+*/
+ 
+ 
+             b   a    c    a     d     e
+                      s
+                                        f
+            
+max:         1   2    3
+set:         b   ba   bac
+ 
+ 
+public int longestSubstringWithoutRepeatingCharacters(String s) {
+  if (s == null || s.length == 0) return 0;
+  Set<Character> set = new HashSet<Character>();
+  int max = 0;
+  int slow = 0;
+  int fast = 0;
+  while (fast < s.length()) {
+    char cfast = s.charAt(fast);
+    char cslow = s.charAt(slow);
+    if (!set.contains(cfast)) {
+      set.add(cfast);
+    } else {
+      while (cslow != cfast) {
+        set.remove(cslow);
+        cslow = s.charAt(++slow);
+      }
+      slow++;
+    }
+    max = Math.max(max, fast - slow + 1);
+    fast++;
+  }
+  return max;
+}
+ 
+ 
+ 
+ 
+// Missing Ranges
+// Given a sorted integer array where the range of elements are [0, 99] inclusive, return its missing ranges.
+// For example, given [0, 1, 3, 50, 75], return [“2”, “4->49”, “51->74”, “76->99”]
+                                       i
+                                s
+public class Solution {
+    public List<String> findMissingRanges(int[] A, int lower, int upper) {
+        List<String> result = new ArrayList<String>();
+        int pre = lower - 1;
+        for(int i = 0 ; i <= A.length  ; i++){
+            int after = i == A.length ? upper + 1 : A[i]; 
+            if(pre + 2 == after){
+                result.add(String.valueOf(pre + 1));
+            }else if(pre + 2 < after){
+                result.add(String.valueOf(pre + 1) + "->" + String.valueOf(after - 1));
+            }
+            pre = after;
+        }
+        return result;
+    }
+}
+ 
+ 
+ 
+ 
+/***
+/* Trapping Rain Water
+// Given n non-negative integers representing an elevation map where the width of each bar is 1, compute how much water it is able to trap after raining.
+               3
+      2        2  2     2
+  1   1  1   1 1  1  1  1  1
+0 0 0 0  0 0 0 0  0  0  0  0
+ 
+  l
+                        r
+For example, Given [0,1,0,2,1,0,1,3,2,1,2,1], return 6.
+The above elevation map is represented by array [0,1,0,2,1,0,1,3,2,1,2,1]. In this case, 6 units of rain water (blue section) are being trapped.
+*/
+ 
+ 
+public class Solution {
+    public int trap(int[] A) {
+        if (A.length() < 3) return 0;
+        int left = 0;
+        int right = A.length - 1;
+        int sum = 0;
+        // Find the first peak position on the left
+        while (left < right && A[left] <= A[left + 1]) left++;
+        // Find the first peak positon on the right
+        while(left < right && A[right] <= A[right-1]) right--;
+        // party begin
+        while(left < right) {
+            int leftVal = A[left];
+            int rightVal = A[right];
+            // 如果左边峰值较小，先计算左边
+            // because we don't need wo worry about the right since the right is taller and the result depend on the shorter one
+            if(leftVal < rightVal){
+                // ++left is because we want to ++ then compare
+                // this is awesome, need to recite
+                while(left < right && leftVal >= A[++left]){
+                    sum += leftVal - A[left];
+                }
+            // 如果右边峰值较小，先计算右边
+            } else {
+                while(left < right && rightVal >= A[--right]){
+                    sum += rightVal - A[right];
+                }
+            }
+        }
+        return sum;
+    }
+}
+ 
+ 
+ 
+ 
+// Minumum Window Substring
+// Given a string S and a string T, find the minimum window in S which will contain all the characters in T in complexity O(n).
+ 
+// For example,
+// S = "ADOBECODEBANC"
+ 
+// T = "ABC"
+// Minimum window is "BANC".
+ 
+ 
+// S = "A   D   O    B   E   C   O   D   E   B   A   N   C"
+ 
+                                            start
+                                                        end
+ 
+count: 2 (count++的条件是t里的value和shash里的value相等了)  
+minLen: 4   
+ 
+Shash {a -> 1,b->1, c-> 1 d-> 1 o-> 1, e-> 1}
+ 
+Thash {a-> 1, b-> 1, c-> 1}
+ 
+public class Solution {
+    public String minimumWindowSubstring(String S, String T) {
+        HashMap<Character, Integer> sMap = new HashMap<Character, Integer>();
+        HashMap<Character, Integer> tMap = new HashMap<Character, Integer>();
+        int start = 0;
+        int end = 1;
+        // S = "A  D  O  B  E  C  O  D  E  B A  N  C"
+              start
+                  end
+                  
+        int min = INT_MAX;
+        String minString;
+        String string = S.substring(start, end);
+        while (end < S.length() + 1) {
+            if (string.isValid(sMap, tMap)) {
+                if (string.length() < min) {
+                    int minStart = start;
+                    int minLen = end - minStart + 1;
+                }
+                sMap.get(start)--;
+                start += 1;
+            }
+            else {
+                end += 1;
+                char nextchar = S.charAt(end - 1)
+                if (!sMap.containsKey(nextchar)) {
+                    sMap.put(nextchar, 0);
+                }
+                sMap.get(nextchar)++;
+                }
+            }
+        }
+        return S.substring(minStart, minLen+minStart);
+    }
+ 
+    public boolean isValid(HashMap<>sMap,HashMap<> tMap) {
+        for (char key: tMap.keySet()) {
+            if (sMap.containsKey(key) && sMap.get(key) >= tMap.get(key)) continue;
+            return false;
+        }
+        return true;
+    }
+}
+ 
+ 
+ 
+ 
+// 2Sum --> 4 Sum
+ 
+ 
+O(n^3) Space: O(1)
+ 
+public class 4Sum {
+  public List<List<Integer>> fourSum(int[] num, int target) {
+    List<List<Integer>> res = new ArrayList<List<Integer>>();
+    if (num == null || num.length <= 3) return res;
+    Arrays.sort(num);
+    for (int i = num.length - 1; i > 2; i--) {
+      if (i == num.length - 1 || num[i] != num[i+1]) {
+        List<List<Integer>> subRes = threeSum(num, i-1, target-num[i]);
+        for (int j = 0; j < subRes.size(); j++) {
+          subRes.get(j).add(num[i]);
+        }
+        res.addAll(subRes);
+      }
+    }
+    return res;
+  }
+  
+  private List<List<Integer>> threeSum(int[] num, int idx, int target) {
+    List<List<Integer>> res = new ArrayList<List<Integer>>();
+    if (num == null || num.length <= 2) return res;
+    Arrays.sort(num);
+    for (int i = idx; i > 1; i--) {
+      if (i == idx || num[i] != num[i+1]) {
+        List<List<Integer>> subRes = twoSum(num, i-1, target-num[i]);
+        for (int j = 0; j < subRes.size(); j++) {
+          subRes.get(j).add(num[i]);
+        }
+        res.addAll(subRes);
+      }
+    }
+    return res;
+  }
+  
+  private List<List<Integer>> twoSum(int[] num, int idx, int target) {
+    List<List<Integer>> res = new ArrayList<List<Integer>>();
+    int left = 0;
+    int right = idx;
+    while (left < right) { 
+      if (num[left] + num[right] == target) {
+        List<Integer> subRes = new ArrayList<Integer>();
+        subRes.add(num[left]);
+        subRes.add(num[right]);
+        res.add(subRes);
+        left++;
+        right--;
+        while (left < right && num[left] == num[left-1]) {
+          left++;
+        }
+        while (left < right && num[right] == num[right+1]) {
+          right--;
+        }
+      } else if (num[left] + num[right] < target) {
+        left++;
+      } else {
+        right--;
+      }
+    }
+    return res;
+  }
+}
+ 
+ 
+ 
+ 
+public int[] twoSum(int[] nums, int target) {
+  Map<Integer, Integer> map = new HashMap<Integer, Integer>();
+  for (int i = 0; i < numms.length; i++) {
+    if (map.containsKey(target - nums[i]) {
+      return new int[] {map.get(target - nums[i]), i};
+    }
+    map.put(nums[i], i);
+  }
+  return null;
+}
+ 
+ 
+        
+KMP 算法: 
+haystack: 
+ 
+a  b  x  a  b  c  a  b  c  a  b  y
+                                  f
+ 
+ 
+needle: 
+a  b  c  a  b  y
+               s
+ 
+next:
+0  0  0  1  2  0
+  
+ 
+how to build next array:
+int i = 1;
+int j = 0;
+int len = needle.length();
+while (i < len) {
+  if (needle.charAt(i) == needle.charAt(j)) next[++i] = ++j;
+  else if (j == 0) ++i;
+  else j = res[j];
+}

@@ -1,0 +1,666 @@
+
+
+/**
+* Given a binary tree
+* 
+*     struct TreeLinkNode {
+*       TreeLinkNode *left;
+*       TreeLinkNode *right;
+*       TreeLinkNode *next;
+*     }
+* Populate each next pointer to point to its next right node. If there is no next right node, the next pointer should be set to NULL.
+* 
+* Initially, all next pointers are set to NULL.
+* 
+* Note:
+* 
+* You may only use constant extra space.
+* You may assume that it is a perfect binary tree (ie, all leaves are at the same level, and every parent has two children).
+* For example,
+* Given the following perfect binary tree,
+*          1
+*        /  \
+*       2    3
+*      / \  / \
+*     4  5  6  7
+* After calling your function, the tree should look like:
+*          1 -> NULL
+*        /  \
+*       2 -> 3 -> NULL
+*      / \  / \
+*     4->5->6->7 -> NULL
+*/
+
+/**
+ * Definition for binary tree with next pointer.
+ * public class TreeLinkNode {
+ *     int val;
+ *     TreeLinkNode left, right, next;
+ *     TreeLinkNode(int x) { val = x; }
+ * }
+ */
+ 
+/*
+这道题是要将一棵树的每一层维护成一个链表，树本身是给定的
+其实思路上很接近层序遍历Binary Tree Level Order Traversal，只是这里不需要额外维护一个队列
+因为这里每一层我们会维护成一个链表，这个链表其实就是每层起始的那个队列，
+因此我们只需要维护一个链表的起始指针就可以依次得到整个队列了 接下来就是有左加左入链表，有右加右入链表，
+知道链表没有元素了说明到达最底层了 算法的复杂度仍然是对每个结点访问一次，所以是O(n)，
+而空间上因为不需要额外空间来存储队列了，所以是O(1)
+这道题是树的层序遍历Binary Tree Level Order Traversal的扩展，操作上会更加繁琐一些，
+因为是通过维护层链表来完成遍历，不过本质上还是一次广度优先搜索
+*/
+
+
+                                            1 -> NULL  
+                                          /  \
+                                         2 -> 3 -> NULL
+                                        / \  / \
+                                       4->5->6->7 -> NULL
+                                      p 
+双指针法 Two Pointers
+复杂度
+时间 O(N) 空间 O(1)
+
+思路
+上述两种方法都会使用额外空间。实际上，我们可以用一个指针记录当前层内遍历到的节点，另一个指针记录下一层第一个节点，来省去空间开销。这样，我们可以基于上一层的next指针进行横向遍历，同时遍历到该层尽头时又能使用记录下的下一层第一个节点的指针来直接跳转到下一层。
+
+代码
+public class Solution {
+  public void connect(TreeLinkNode root) {
+    if(root == null) return;
+    //记录该层当前节点的指针，也叫做父节点，我们通过遍历父节点，来连接它们的子节点
+    TreeLinkNode p = root;
+    //记录下层第一个节点的指针
+    TreeLinkNode first = null;
+    while(p != null){
+      //当first为空时，说明刚跳转到新的一层，需要设置下一层的第一个节点了
+      if(first == null){
+          first = p.left;
+      }
+      //如果有左子节点，则其next是右子节点，如果没有，则遍历结束
+      //因为我们实际上是将下一层的节点用next指针连接，所以当遍历到叶子结点时已经没有下一层
+      if(p.left != null){
+          p.left.next = p.right; 
+      } else {
+          break;
+      }
+      //如果父节点有next，则next的左子节点是父节点的右子节点的next，如果没有，说明这层遍历完了，转入下一层
+      if(p.next != null){
+          p.right.next = p.next.left;
+          p = p.next;
+      } else {
+          p = first;
+          first = null;
+      }
+    }
+  }
+}
+
+/**
+* Sort a linked list using insertion sort.
+*/
+
+/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode(int x) { val = x; }
+ * }
+ */
+
+/*
+复杂度
+时间 O(n^2) 空间O(1)
+
+思路：插入排序 
+做一个空链表，然后不断加入原链表中的最小元素即可。
+cur是原链表head的指针，不断向后扫描；node是空链表dummy的指针，用node.next与cur所指向的结点进行比较，
+一旦发现排列好的新链表中有大于cur的结点，就把cur放在node.next，然后进行下一轮循环：cur.next作为原链表新的cur，node返回新链表起点dummy
+最后，当cur = null，即遍历完整个原链表之后，新链表排序完成。返回dummy.next即可。
+*/ 
+         cur 
+ a b c d e f g 
+  
+            prev    cur           cur  tmp
+              1  3  7   8   2
+    dummy -> 1 ->  2 -> 3 -> 7 -> 8 -> null
+            node
+    
+    
+public class InsertionSortList {
+  public ListNode insertionSortList(ListNode head) {
+    ListNode dummy = new ListNode(0);
+    ListNode cur = head;
+    while (cur != null) {
+      ListNode node = dummy;
+      while (node.next != null && node.next.val < cur.val) {
+        node = node.next;
+      }
+      ListNode tmp = cur.next;
+      cur.next = node.next;
+      node.next = cur;
+      cur = tmp;
+    }
+    return dummy.next;
+  }
+} 
+
+
+/**
+* Write a program to find the node at which the intersection of two singly linked lists begins.
+* 
+* 
+* For example, the following two linked lists:
+* 
+* A:          a1 → a2
+*                    ->
+*                      c1 → c2 → c3
+*                    ->            
+* B:     b1 → b2 → b3
+* begin to intersect at node c1.
+* 
+* 
+* Notes:
+* 
+* If the two linked lists have no intersection at all, return null.
+* The linked lists must retain their original structure after the function returns.
+* You may assume there are no cycles anywhere in the entire linked structure.
+* Your code should preferably run in O(n) time and use only O(1) memory.
+*/
+
+/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode(int x) {
+ *         val = x;
+ *         next = null;
+ *     }
+ * }
+ */
+
+/*
+复杂度
+时间 O(n) 空间O(1)
+
+思路：双指针 追击问题
+两个指针分别从两个链表头出发 依次每次走一步 无论谁走到null 下一个开始走另一个的开头 
+相遇时，有：
+LenA + LenShare + LenB = LenB + LenShare + LenA 
+  lenA    LenShare
+<------>|<-------->
+   <--->|<-------->
+   LenB   LenShare 
+由于循环结束的条件为两指针相遇 故一定在交点处相遇 
+*/ 
+                 p1
+                 a1 → a2
+                        ->
+                          c1 → c2 → c3
+          p2            ->            
+            b1 → b2 → b3
+
+
+public class IntersectionOfTwoLinkedLists {
+  public ListNode getIntersectionNode(ListNode headA, ListNode headB) {
+    if (headA == null || headB == null) return null;
+    ListNode ptrA = headA;
+    ListNode ptrB = headB;
+    while (ptrA != ptrB) {
+      ptrA = (ptrA == null) ? headB : ptrA.next;
+      ptrB = (ptrB == null) ? headA : ptrB.next;
+    }
+    return ptrA;
+  }
+}
+
+/**
+* Merge two sorted linked lists and return it as a new list. The new list should be made by splicing together the nodes of the first two lists.
+*/
+
+/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode(int x) { val = x; }
+ * }
+ */
+ 
+ /*
+复杂度
+时间 O(N) 空间 O(1)
+
+思路:顺序插入
+该题就是简单的把两个链表的节点拼接起来，我们可以用一个Dummy头，将比较过后的节点接在这个Dummy头之后。
+最后如果有没比较完的，说明另一个list的值全比这个list剩下的小，而且拼完了，所以可以把剩下的直接全部接上去。
+*/
+                     cur
+  dummy -> 1 - > 2 -> 5
+    
+        l1
+    1 2 99 100 
+  
+      l2
+    5 6 7 8
+
+public class MergeTwoSortedLists {
+  public ListNode mergeTwoLists(ListNode l1, ListNode l2) {
+    // create a dummy node as head 
+    ListNode dummy = new ListNode(0);
+    ListNode curr = dummy;
+    while(l1 != null && l2 != null) {
+    if (l1.val <= l2.val) {
+      curr.next = l1;
+    l1 = l1.next;
+    } else {
+    curr.next = l2;
+    l2 = l2.next;
+    }
+    curr = curr.next;
+  }
+    // connect the rest of the nodes 
+    if (l1 != null) {
+    curr.next = l1;
+  } else if (l2 != null) {
+    curr.next = l2;
+  }
+    return dummy.next;  
+  }
+}
+
+/**
+* Merge k sorted linked lists and return it as one sorted list. Analyze and describe its complexity.
+*/
+
+/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode(int x) { val = x; }
+ * }
+ */
+
+/*
+复杂度
+时间 O(NlogK) 空间 O(K)
+
+思路:优先队列
+当我们归并k个列表时，最简单的方法就是，对于每次插入，我们遍历这K个列表的最前面的元素，找出K个中最小的再加入到结果中。
+不过如果我们用一个优先队列（堆），将这K个元素加入再找堆顶元素，每次插入只要logK的复杂度。
+当拿出堆顶元素后，我们再将它所在链表的下一个元素拿出来，放到堆中。这样直到所有链表都被拿完，归并也就完成了。
+
+因为堆中是链表节点，我们在初始化堆时还要新建一个Comparator的类。
+*/
+
+
+
+lists         l1
+ [0]  ->  1   3   5   7 
+   
+   
+               l2
+ [1]  ->   2   4   6   8 
+
+                   cur
+dummy -> 1 -> 2 -> 3 
+
+
+
+
+
+public class MergeKSortedLists {
+  public ListNode mergeKLists(ListNode[] lists) {
+    if(lists.length == 0) return null;
+    ListNode dummy = new ListNode(0);
+    PriorityQueue<ListNode> queue = new PriorityQueue<ListNode>(lists.length, new Comparator<ListNode>() {
+      public int compare(ListNode node1, ListNode node2) {
+        return node1.val - node2.val;
+      }
+    });
+    // initialize size of queue as K  
+    for (int i = 0; i < lists.length; i++) {
+      if (lists[i] != null) {
+        queue.offer(lists[i]);
+      }
+    }
+    
+    ListNode curr = dummy;
+    
+    while(!queue.isEmpty()) {
+      // get the first val from heap
+      curr.next = queue.poll();
+      curr = curr.next;
+      // put the item next to the first one into heap 
+      if (curr.next != null) {
+        queue.offer(curr.next);
+      }
+    }
+    return dummy.next;
+  } 
+}
+
+
+
+
+public class Solution {
+    public ListNode mergeKLists(List<ListNode> lists) {
+        if (lists==null||lists.size()==0) return null;
+        
+        PriorityQueue<ListNode> queue= new PriorityQueue<ListNode>(lists.size(),new Comparator<ListNode>(){
+            @Override
+            public int compare(ListNode o1,ListNode o2){
+                if (o1.val<o2.val)
+                    return -1;
+                else if (o1.val==o2.val)
+                    return 0;
+                else 
+                    return 1;
+            }
+        });
+        
+        ListNode dummy = new ListNode(0);
+        ListNode tail=dummy;
+        
+        for (ListNode node:lists)
+            if (node!=null)
+                queue.add(node);
+            
+        while (!queue.isEmpty()){
+            tail.next=queue.poll();
+            tail=tail.next;
+            
+            if (tail.next!=null)
+                queue.add(tail.next);
+        }
+        return dummy.next;
+    }
+}
+
+
+public static ListNode mergeKLists(ListNode[] lists){
+    return partion(lists,0,lists.length-1);
+}
+
+public static ListNode partion(ListNode[] lists,int s,int e){
+    if(s==e)  return lists[s];
+    if(s<e){
+        int q=(s+e)/2;
+        ListNode l1=partion(lists,s,q);
+        ListNode l2=partion(lists,q+1,e);
+        return merge(l1,l2);
+    }else
+        return null;
+}
+
+//This function is from Merge Two Sorted Lists.
+public static ListNode merge(ListNode l1,ListNode l2){
+    if(l1==null) return l2;
+    if(l2==null) return l1;
+    if(l1.val<l2.val){
+        l1.next=merge(l1.next,l2);
+        return l1;
+    }else{
+        l2.next=merge(l1,l2.next);
+        return l2;
+    }
+}
+
+/**
+* Given a singly linked list, determine if it is a palindrome.
+* 
+* Follow up:
+* Could you do it in O(n) time and O(1) space?
+*/
+/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode(int x) { val = x; }
+ * }
+ */
+
+/*
+复杂度
+时间：O(O) 空间：O(1)
+
+思路：
+1. 找链表中点
+2. 从中点之后翻转列表
+3. 双指针一个指向头,另一个指向中点下一个,顺序对比.如果都一样,则原链表是回文列表
+*/ 
+
+ 1 2 3 4 3 2 1 
+  
+       p1 
+ 1 2 3 4 1 2 3 
+              p2
+              
+      s     f
+1 2 3 4 4 3 2 1
+// important: 中点下标是len/2 - 1
+
+public class PalindromeLinkedList {
+  public boolean isPalindrome(ListNode head) {
+    if (head == null) return true;
+    ListNode mid = findMiddle(head);
+    mid.next = reverse(mid.next);
+    ListNode ptr1 = head;
+    ListNode ptr2 = mid.next;
+    while (ptr1 != null && ptr2 != null) {
+      if (ptr1.val != ptr2.val) return false;
+      ptr1 = ptr1.next;
+      ptr2 = ptr2.next;
+    }
+    return true;    
+  }
+
+  
+//   如果让slow停在4， 那么这么写
+// 如果让slow停在3， 那么这样初始：
+ //  slow     fast
+ // dummy ->  head -> .... -> null
+  private ListNode findMiddle(ListNode head) {
+    if (head == null) return null;
+    ListNode slow = head;
+    ListNode fast = head;
+    while (fast.next != null && fast.next.next != null) {
+      slow = slow.next;
+      fast = fast.next.next;
+    }
+    return slow;
+  }
+  
+null <- 1 <- 2 <- 3   
+
+1 2 3 
+
+  private ListNode reverse(ListNode head) {
+    ListNode prev = null;
+    while (head != null) {
+      ListNode tmp = head.next;
+      head.next = prev;
+      prev = head;
+      head = tmp;
+    }
+    return prev;
+  }
+}
+
+
+
+public boolean isBalanced(TreeNode root) {
+  if (root == null) {
+    return true;
+  }
+  int leftDepth = helper(root.left);
+  int rightDepth = helper(root.right);
+  return Math.abs(left -right) <= 1;
+}
+
+private int helper(TreeNode root) {
+  if (root == null) return 0;
+  int left = helper(root.left);
+  int right = helper(root.right);
+  return Math.max(left, right) + 1;
+}
+
+
+/**
+* Given a binary tree, imagine yourself standing on the right side of it, return the values of the nodes you can see ordered from top to bottom.
+* 
+* For example:
+* Given the following binary tree,
+*    1            <---
+*  /   \
+* 2     3         <---
+*  \     \
+*   5     4       <---
+* You should return [1, 3, 4].
+*/
+
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode(int x) { val = x; }
+ * }
+ */
+
+/*
+由于每层只选择一个节点，所以优先访问右侧的节点。当List<Integet>的大小与层的深度一致时，说明已经加入了最右侧的节点，
+该层的其他节点无需再加入
+*/
+public class BinaryTreeRightSideView {
+  public List<Integer> rightSideView(TreeNode root) {
+    List<Integer> res = new ArrayList<Integer>();
+    if (root == null) {
+      return res;
+    }
+    helper(root, res, 0);
+    return res;
+  }
+  
+  private void helper(TreeNode root, List<Integer> res, int level) {
+    if (root == null) {
+      return;
+    }
+    if (res.size() == level) {
+      res.add(root.val);
+    } 
+    helper(root.right, res, level+1);
+    helper(root.left, res, level+1);
+  }
+}
+
+
+public class ClosestBinarySearchTreeValue {
+  public int closestValue(TreeNode root, double target) {
+    TreeNode subRoot = null;
+  // pick up one of subtrees
+    if (target < root.val) {
+    subRoot = root.left;
+  } else {
+    subRoot = root.right;
+  }  
+  // no children -> recursion hits leaf
+    if (subRoot == null) {
+      return root.val;
+    }
+  // find closest val recursively
+    int closest = closestValue(subRoot, target);
+ 
+    double diffToRoot = Math.abs(root.val - target);
+    double diffToSubRoot = Math.abs(closest - target);
+    if (diffToRoot < diffToSubRoot) {
+      return root.val;
+    } else {
+      return closest;
+    }  
+  }
+} 
+
+
+/**
+* Given a singly linked list where elements are sorted in ascending order, 
+* convert it to a height balanced BST.
+*/ 
+
+/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode(int x) { val = x; }
+ * }
+ */
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode(int x) { val = x; }
+ * }
+ */
+
+/*
+复杂度
+时间:O(n) 空间：O(n)
+
+思路： bottom to up construction 
+先递归构建左子树，在构建左子树的同时不断移动链表的头指针，
+链表的头指针永远是对应当前子树位置 一直到左叶子节点，左叶子节点对应的就是链表的第一个元素，
+生成左叶子节点之后移动链表当前指针
+*/ 
+public class ConvertSortedListToBinarySearchTree {
+  public TreeNode sortedListToBST(ListNode head) {
+    if (head == null) return null;          
+    ListNode curHead = head;
+    int len = 0;
+    while (curHead != null) {
+      curHead = curHead.next;
+      len++;
+    }
+    List<ListNode> list = new ArrayList<>();
+    list.add(head);
+    TreeNode root = helper(list, 0, len-1);
+    return root;
+  }
+  
+  private TreeNode helper(List<ListNode> list, int idxL, int idxR) {
+    if (idxL > idxR) {
+      return null;
+    }
+    int mid = (idxL + idxR) / 2;
+    TreeNode left = helper(list, idxL, mid-1);
+    TreeNode root = new TreeNode(list.get(0).val);
+    root.left = left;
+    list.add(0, list.get(0).next);
+    root.right = helper(list, mid+1, idxR);
+    return root;
+  }  
+}
+
+
+
+public class Solution {
+    public boolean isValidBST(ListNode root) {
+        // 这里换成了最大值最小值， 因为传入null的话应该就会有错误
+        return isValid(root, Integer.MAX_VALUE, Integer.MIN_VALUE);
+    }
+
+    private boolean isValid(ListNode root, int max, int min) {
+        if (root == null) return true;
+        if (root.val >= max) return false;
+        if (root.val <= min) return false;
+        return isValid(root.left, root.val, min) && isValid(root.right, max, root.val);
+    }
+}

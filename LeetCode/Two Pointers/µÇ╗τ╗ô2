@@ -1,0 +1,448 @@
+6.19
+Two Pointer \\\^v^///
+
+/**
+* A linked list is given such that each node contains an additional random pointer which could point to any node in the list or null.
+* 
+* Return a deep copy of the list.
+*/
+/**
+ * Definition for singly-linked list with a random pointer.
+ * class RandomListNode {
+ *     int label;
+ *     RandomListNode next, random;
+ *     RandomListNode(int x) { this.label = x; }
+ * };
+ */
+
+/*
+solution 1
+复杂度
+时间：O(n) 空间O(1)
+
+思路：双指针+三次扫描
+fist pass: copy each node and connect copy next to original 
+second pass: copy random field to copied node: cur.next.random = cur.random.next
+third pass: get a deep copy from mixed list 
+*/ 
+
+          cur
+a -> b -> e -> r 
+|    |    |    |
+e    a    b    a
+                                            newNode
+             newHead   cur              cur
+newNode: a -> a_copy -> b ->  b_copy -> e -> e_copy -> r -> r_copy -> null
+         |              |               |              |
+         e              a               b              a
+                |               |              |             |
+              e_copy           a_copy        b_copy        a_copy  
+                
+         a -> b -> e       
+        a_copy -> b_copy -> e_copy         
+
+public class CopyListWithRandomPointer {
+  public RandomListNode copyRandomList(RandomListNode head) {
+    if (head == null) return head;
+    RandomListNode cur = head;
+    // pass 1: copy each node and connect newNode to next of original one 
+    while (cur != null) {
+      RandomListNode newNode = new RandomListNode(cur.label);
+      newNode.next = cur.next;
+      cur.next = newNode;
+      cur = newNode.next;
+    }
+    // pass 2: copy random field to newNode  
+    cur = head;
+    while (cur != null && cur.next != null) {
+      if (cur.random != null) {
+        // note that cur.random is original, cur.random.next is copy. 
+        // so we point copy's random to random's copy 
+        cur.next.random = cur.random.next;
+      }  
+      cur = cur.next.next;
+    }
+    // pass 3: get a deep copy from mixed list 
+    RandomListNode newHead = head.next;
+    cur = head;
+    while (cur != null) {
+      RandomListNode newNode = cur.next;
+      cur.next = newNode.next;
+      if (newNode.next != null) {
+        newNode.next = newNode.next.next;
+      }
+      cur = cur.next;
+    }
+    return newHead;
+  }
+}
+
+/*
+solution 2
+复杂度
+时间：O(n) 空间：O(n) 
+
+思路：HaspMap
+maintain a HashMap: <key, value> = <original, copy>
+first pass: generate HashMap
+second pass: copy random field
+*/
+
+
+cur      
+a -> b -> e -> r -> null
+|    |    |    |
+e    a    b    a
+
+Map: 
+    newHead   cp_cur
+<a, a_copy -> b_copy>
+     |
+     e_cp
+cur  
+<b, b_copy -> e_copy>    
+ 
+cur  
+<e, e_copy>    
+     prev
+     
+     
+public class CopyListWithRandomPointer {
+  public RandomListNode copyRandomList(RandomListNode head) {
+    if (head == null) return head;
+    Map<RandomListNode, RandomListNode> map = new HashMap<RandomListNode, RandomListNode>();
+    RandomListNode newHead = new RandomListNode(head.label);
+    map.put(head, newHead);
+    RandomListNode prev = newHead;
+    RandomListNode cur = head.next;
+    
+    while (cur != null) {
+      RandomListNode newNode = new RandomListNode(cur.label);
+      map.put(cur, newNode);
+      prev.next = newNode;
+      prev = newNode;
+      cur = cur.next;
+    }
+    
+    cur = head;
+    RandomListNode copiedCur = newHead;
+    while (cur != null) {
+      copiedCur.random = map.get(cur.random); //
+      copiedCur = copiedCur.next;
+      cur = cur.next;
+    }
+    return newHead;
+  }
+}
+
+
+/*
+* Given an array of non-negative integers, you are initially positioned at the first index of the array.
+* 
+* Each element in the array represents your maximum jump length at that position.
+* 
+* Your goal is to reach the last index in the minimum number of jumps.
+* 
+* For example:
+* Given array A = [2,3,1,1,4]
+* 
+* The minimum number of jumps to reach the last index is 2. (Jump 1 step from index 0 to 1, then 3 steps to the last index.)
+* 
+* Note:
+* You can assume that you can always reach the last index.
+*/
+
+/*
+复杂度
+时间O(n^2) 空间O(1)
+
+思路：双指针
+要计算最短的步数，就不能贪心每次都找最远距离了，因为有可能一开始跳的远的路径，后面反而更慢。
+所以要探索所有的可能性.维护一个窗口，计算在这一步下能达到的最远距离，不断移动这个窗口.移动过程中计数，
+记录需要移动几次，才能覆盖末尾的值
+*/
+
+cnt = 2;
+
+[2,    3,    1,    1,   4]
+                   s
+                        e 
+             pe
+             i
+
+
+public class JumpGameII {
+  public int jump(int[] nums) {
+    if (nums == null || nums.length == 0) return 0;
+    int cnt = 0;
+    int start = 0;
+    int end = 0;
+    int preEnd = 0;//
+    while (end < nums.length - 1) {
+      cnt++;
+      preEnd = end;
+      for (int i = start; i <= preEnd; i++) {
+        end = Math.max(end, nums[i] + i);   
+      }
+      start = preEnd + 1; //
+    }
+    return cnt;     
+  }
+}
+
+
+/**
+* Given an array of non-negative integers, you are initially positioned at the first index of the array.
+* 
+* Each element in the array represents your maximum jump length at that position.
+* 
+* Determine if you are able to reach the last index.
+* 
+* For example:
+* A = [2,3,1,1,4], return true.
+* 
+* A = [3,2,1,0,4], return false.
+*/
+
+/*
+复杂度
+时间
+
+思路：贪心
+维护一个最大距离，遍历数组的过程中 如果当前idx加上当前最远距离大于最大距离，则更新最大距离
+
+注意for循环中的条件里的：i<=max:
+*/
+
+public class JumpGame {
+  public boolean canJump(int[] nums) { 
+    if (nums == null || nums.length == 0) return false;
+    int max = 0;
+//     careful ** i < nums.length && i <= max      举例 A = [3,2,1,0,4]
+    for (int i = 0; i < nums.length && i <= max; i++) {
+      max = Math.max(max, nums[i] + i);
+    }
+    return max >= nums.length - 1 ? true : false;
+  }
+}
+
+/**
+* Given a linked list, return the node where the cycle begins. If there is no cycle, return null.
+* 
+* Note: Do not modify the linked list.
+* 
+* Follow up:
+* Can you solve it without using extra space?
+*/
+
+/**
+ * Definition for singly-linked list.
+ * class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode(int x) {
+ *         val = x;
+ *         next = null;
+ *     }
+ * }
+ */
+
+/*
+复杂度
+时间：O(n) 空间:(1)
+
+思路：双指针 追击问题
+Linked List Cycle的扩展，就是在确定是否有cycle之后还要返回cycle的起始点的位置
+设整个链表长L，环入口与相遇点距离为x，起点到环入口点的距离为a, 环长为r, fast指针在环内已循环了n圈
+
+a + x = nr
+a + x = (n – 1)r + r = (n-1)r + L - a
+a = (n-1)r + (L – a – x)
+
+(L – a – x)为相遇点到环入口点的距离，由此可知，从链表头到环入口点等于(n-1)循环内环+相遇点到环入口点，于是我们从链表头、与相遇点分别设一个指针，
+每次各走一步，两个指针必定相遇，且相遇第一点为环入口点
+*/ 
+ 
+public class LinkedListCycleII {
+  public ListNode detectCycle(ListNode head) {
+    if (head == null || head.next == null) return null;
+    ListNode slow = head;
+    ListNode fast = head;
+    while(fast != null && fast.next != null) {
+      fast = fast.next.next;
+      slow = slow.next;
+      if (fast == slow) break;
+    }
+    if (fast == null || fast.next == null) return null; // no cycle
+    slow = head;
+    while(slow != fast) {
+      slow = slow.next;
+      fast = fast.next;
+    }
+    return slow;
+  }
+}
+
+
+/**
+* Given a linked list, determine if it has a cycle in it.
+* 
+* Follow up:
+* Can you solve it without using extra space?
+*/
+
+/**
+ * Definition for singly-linked list.
+ * class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode(int x) {
+ *         val = x;
+ *         next = null;
+ *     }
+ * }
+ */
+
+public class LinkedListCycle {
+  public boolean hasCycle(ListNode head) {
+    if (head == null) return false;
+    ListNode fast = head;
+    ListNode slow = head;
+    //由于fast每次走两步,所以要判断fast.next非空,但fast.next能执行的前提是fast!=null
+    while(fast != null && fast.next != null) {
+      fast = fast.next.next;
+      slow = slow.next;
+      if(fast == slow) {
+        return true;
+      }
+    }
+    return false;
+  }
+}
+
+
+
+
+https://leetcode.com/problems/find-the-duplicate-number/#/description
+
+/*
+Given an array nums containing n + 1 integers where each integer is between 1 and n (inclusive), prove that at least one duplicate number must exist. Assume that there is only one duplicate number, find the duplicate one.
+
+Note:
+You must not modify the array (assume the array is read only).
+You must use only constant, O(1) extra space.
+Your runtime complexity should be less than O(n2).
+There is only one duplicate number in the array, but it could be repeated more than once.
+*/
+
+--------------------------
+O(n)  O(1)
+The main idea is the same with problem Linked List Cycle II,https://leetcode.com/problems/linked-list-cycle-ii/. Use two pointers the fast and the slow. The fast one goes forward two steps each time, while the slow one goes only step each time. They must meet the same item when slow==fast. In fact, they meet in a circle, the duplicate number must be the entry point of the circle when visiting the array from nums[0]. Next we just need to find the entry point. We use a point(we can use the fast one before) to visit form begining with one step each time, do the same job to slow. When fast==slow, they meet at the entry point of the circle. The easy understood code is as follows.
+
+O(nlogn)
+This solution is based on binary search.
+
+At first the search space is numbers between 1 to n. Each time I select a number mid (which is the one in the middle) and count all the numbers equal to or less than mid. Then if the count is more than mid, the search space will be [1 mid] otherwise [mid+1 n]. I do this until search space is only one number.
+
+Let's say n=10 and I select mid=5. Then I count all the numbers in the array which are less than equal mid. If the there are more than 5 numbers that are less than 5, then by Pigeonhole Principle (https://en.wikipedia.org/wiki/Pigeonhole_principle) one of them has occurred more than once. So I shrink the search space from [1 10] to [1 5]. Otherwise the duplicate number is in the second half so for the next step the search space would be [6 10].
+
+下标 -> 数：一一对应
+数组 [4, 1 , 3,  2,  3] 
+位置  0  1   2   3   4
+ 
+[2,1,3,1]
+ 0 1 2 3
+0-> 2
+{1,3} -> 1
+2 -> 3 -> 1 -> 1 -> 1 -> 1
+
+0 -> 2 
+
+fast, slow
+
+fast = num[num[fast]]
+slow = num[slow]
+
+cycle: fast == slow
+
+findDup(int[] nums) {
+  int slow = 0;
+  int fast = 0;
+  
+  while (true) {
+    slow = nums[slow];
+    fast = nums[nums[fast]];
+    
+    if (fast == slow) break;
+  }
+  fast = 0;
+  while (true) {
+    fast = nums[fast]; 
+    slow = nums[slow];
+    
+    if (slow == fast) {
+      return slow;
+    }
+  }
+}
+
+Move Zeroes
+/**
+* Given an array nums, write a function to move all 0's to the end of it while maintaining the relative order of the non-zero elements.
+* 
+* For example, given nums = [0, 1, 0, 3, 12], after calling your function, nums should be [1, 3, 12, 0, 0].
+* 
+* Note:
+* You must do this in-place without making a copy of the array.
+* Minimize the total number of operations.
+*/
+
+/*
+复杂度
+时间：O(n) 空间：O(1)
+
+思路：
+two pointers, one point to first zero element, 
+second point to following first non-zero element.
+
+注意指针移动时边界条件的判断,每次移动之后都检查是否到达边界
+*/
+
+0, 1, 0, 3, 12
+                n
+           z
+
+
+1, 3, 12 , 0, 0
+
+
+
+public class MoveZeroes {
+  public void moveZeroes(int[] nums) {
+    if (nums == null || nums.length <= 1) return;
+    int idxZero = 0;
+    int nonZero = 0;
+    while (nonZero < nums.length) {
+      // find first zero element
+      while (idxZero < nums.length && nums[idxZero] != 0) {
+        idxZero++;
+      }
+      if (idxZero == nums.length) return; // no zero elements found
+      nonZero = idxZero + 1;
+      // find following first non-zero element
+      while (nonZero < nums.length && nums[nonZero] == 0) {
+        nonZero++;
+      }
+      if (nonZero == nums.length) return;
+      swap(nums, idxZero, nonZero);
+    }
+  }
+  
+  private void swap(int[] nums, int i, int j) {
+    int tmp = nums[i];
+    nums[i] = nums[j];
+    nums[j] = tmp;
+  }
+} 
+
+[  <k  |   == k    | >k ]

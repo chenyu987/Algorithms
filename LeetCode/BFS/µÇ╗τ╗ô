@@ -1,0 +1,713 @@
+
+/**
+* Given a binary tree, return the bottom-up level order traversal of its nodes' values. (ie, from left to right, level by level from leaf to root).
+* 
+* For example:
+* Given binary tree [3,9,20,null,null,15,7],
+*     3
+*    / \
+*   9  20
+*     /  \
+*    15   7
+* return its bottom-up level order traversal as:
+* [
+*   [15,7],
+*   [9,20],
+*   [3]
+* ]
+*/
+A{9,20}
+C{15, 7}
+res:{C A}
+
+
+public class Solution {
+    public ArrayList<ArrayList<Integer>> levelOrder(TreeNode root) {
+        ArrayList<ArrayList<Integer>> result = new ArrayList<ArrayList<Integer>>();
+        Queue<TreeNode> q = new LinkedList<TreeNode>();
+        if (root == null) return result;
+        q.offer(root);
+        while (!q.isEmpty()) {
+            int size = q.size();
+            ArrayList<Integer> level = new ArrayList<Integer>();
+            for (int i = 0; i < size; i++) {
+                TreeNode cur = q.poll();
+                level.add(cur.val);
+                if (cur.left != null) q.offer(cur.left);
+                if (cur.right != null) q.offer(cur.right);
+            }
+            result.add(0, level);
+            
+        }
+        return result;
+    }
+}
+
+
+
+
+
+software for recording the video: apowersoft
+
+/**
+* Given a binary tree, return the vertical order traversal of its nodes' values. (ie, from top to bottom, column by column).
+* 
+* If two nodes are in the same row and column, the order should be from left to right.
+* 
+* Examples:
+* Given binary tree [3,9,20,null,null,15,7],
+* 
+*     3
+*    / \
+*   9  20
+*     /  \
+*    15   7
+*  
+* 
+* return its vertical order traversal as:
+* 
+* [
+*   [9],
+*   [3,15],
+*   [20],
+*   [7]
+* ]
+*  
+* 
+* Given binary tree [3,9,20,4,5,2,7],
+* 
+*     _3_
+*    /   \
+*   9    20
+*  / \   / \
+* 4   5 2   7
+*  
+* 
+* return its vertical order traversal as:
+* 
+* [
+*   [4],
+*   [9],
+*   [3,5,2],
+*   [20],
+*   [7]
+* ]
+*/
+
+
+public class BinaryTreeVerticalOrderTraversal {
+  public List<List<Integer>> verticalOrder(TreeNode root) {
+    List<List<Integer>> res = new ArrayList<List<Integer>>();
+    Map<Integer, List<Integer>> map = new HashMap<Integer, List<Integer>>();
+    
+    if (root == null) return res;
+    
+    //level order traversal the tree and keep tack of the column index using Map
+    Queue<TreeNode> queue = new LinkedList<TreeNode>();
+    Queue<Integer> column = new LinkedList<Integer>();
+    queue.offer(root);
+    column.offer(0);
+    int minCol = 0;
+    int maxCol = 0;
+    while (!queue.isEmpty()) {
+      TreeNode curNode = queue.poll();
+      int curIdx = column.poll();
+      if (!map.containsKey(curIdx)) {
+        map.put(curIdx, new ArrayList<Integer>());
+      }
+      map.get(curIdx).add(curNode.val);
+      //此时我们并不知道最小列和最大列分别是几 所以需要维护两个标量去记录
+      minCol = Math.min(minCol, curIdx);
+      maxCol = Math.max(maxCol, curIdx);
+      
+      //左右子节点和相应的列数分别入队
+      if (curNode.left != null) {
+        queue.offer(curNode.left);
+        column.offer(curIdx-1);
+      }
+      if (curNode.right != null) {
+        queue.offer(curNode.right);
+        column.offer(curIndx+1);
+      }
+    }
+    
+    for (int i = minCol; i <= maxCol; i++) {
+      if (map.containsKey(i)) {
+        res.add(map.get(i));
+      }
+    }
+    return res;
+  }
+}
+
+/**
+* Given a binary tree, return the zigzag level order traversal of its nodes' values. (ie, from left to right, then right to left for the next level and alternate between).
+* 
+* For example:
+* Given binary tree [3,9,20,null,null,15,7],
+*     3
+*    / \
+*   9  20
+*     /  \
+*    15   7
+* return its zigzag level order traversal as:
+* [
+*   [3],
+*   [20,9],
+*   [15,7]
+* ]
+*/
+
+/*
+复杂度
+时间：O(n) 空间：O(n)
+
+思路：BFS
+使用队列实现蛇形遍历，发现奇数行的遍历仍然可以按照广度优先遍历的方式实现，
+而对于偶数行，只需要翻转一下
+*/
+ 
+public class BinaryTreeZigzagLevelOrderTraversal {
+  public List<List<Integer>> zigzagLevelOrder(TreeNode root) {
+    List<List<Integer>> res = new ArrayList<List<Integer>>();
+    if (root == null) return res;
+    boolean odd = true;
+    Queue<TreeNode> queue = new LinkedList<TreeNode>();
+    queue.offer(root);
+    while(!queue.isEmpty()) { 
+      // level order traversal
+      int queueLen = queue.size(); //要每一行的结果。必须记录。
+      List<Integer> level = new ArrayList<Integer>();
+      for(int i = 0; i < queueLen; i++) {
+        TreeNode node = queue.poll();
+        level.add(node.val);
+        if(node.left != null) queue.offer(node.left);
+        if(node.right != null) queue.offer(node.right);
+      }
+      // reverse the even level of list
+      if(odd) {
+        res.add(level);
+      } else {
+        Collections.reverse(level); //翻转
+        res.add(level);      
+      }    
+      odd = !odd;
+    }
+    return res;    
+  }
+} 
+
+/**
+* Given two words (beginWord and endWord), and a dictionary's word list, find the length of shortest transformation sequence from beginWord to endWord, such that:
+* 
+* Only one letter can be changed at a time.
+* Each transformed word must exist in the word list. Note that beginWord is not a transformed word.
+* For example,
+* 
+* Given:
+* beginWord = "hit"
+* endWord = "cog"
+* wordList = ["hot","dot","dog","lot","log","cog"]
+* As one shortest transformation is "hit" -> "hot" -> "dot" -> "dog" -> "cog",
+* return its length 5.
+* 
+* Note:
+* Return 0 if there is no such transformation sequence.
+* All words have the same length.
+* All words contain only lowercase alphabetic characters.
+* You may assume no duplicates in the word list.
+* You may assume beginWord and endWord are non-empty and are not the same.
+* UPDATE (2017/1/20):
+* The wordList parameter had been changed to a list of strings (instead of a set of strings). Please reload the code definition to get the latest changes.
+*/
+
+/*
+复杂度
+时间：O(n*26^length(word)) 空间：O(n)
+
+思路： BFS
+求最短距离问题 首先考虑能否用BFS解
+维护一个队列和一个Set,队列里放置单词满足以下条件：
+1.由已有的单词变化一个字符得来
+2.字典里存在
+每次出队一个单词，变化每一个字符，如果字典里面有，则入队
+Set里保存已经检查过的单词
+*/
+
+public class WordLadder {
+  public int ladderLength(String beginWord, String endWord, List<String> wordList) {
+    Queue<String> queue = new LinkedList<String>();
+    Set<String> isHave = new HashSet<String>();
+    Set<String> dicts = new HashSet<String>();
+    for (String str : wordList) {
+      dicts.add(str);
+    }
+    
+    int level = 1;
+    //int lastNum = 1;
+    //int curNum = 0;
+    
+      cur =  h                     o                           t
+           /                      /
+       a  b  c d             a   b  c  d
+    queue.offer(beginWord);
+    isHave.add(beginWord);
+    while (!queue.isEmpty()) {
+      String cur = queue.poll();
+   //   lastNum--;
+      for (int i = 0; i < cur.length(); i++) {
+        char[] curList = cur.toCharArray();
+        for (char c = 'a'; c <= 'z'; c++) {
+          curList[i] = c;
+          String tmp = new String(curList); 
+          if (dicts.contains(tmp) && !isHave.contains(tmp)) {
+            if (tmp.equals(endWord)) {
+              return (level + 1);
+            }
+            queue.offer(tmp);
+            isHave.add(tmp);
+           // curNum++;
+          }
+        }
+      }
+      level++;
+      //if (lastNum == 0) {
+       // lastNum = curNum;
+       // curNum = 0;
+        
+      //}
+    }
+    return 0;    
+  }
+}
+
+// from yu chen
+public int ladderLength(String beginWord, String endWord, Set<String> wordDict) {
+    Queue<String> queue = new LinkedList<String>();
+    // step用来记录跳数
+    int step = 2;
+    queue.offer(beginWord);
+    while(!queue.isEmpty()){
+        int size = queue.size();
+        // 控制size来确保一次while循环只计算同一层的节点，有点像二叉树level order遍历
+        for(int j = 0; j < size; j++){
+           String currWord = queue.poll();
+            // 循环这个词从第一位字母到最后一位字母
+            for(int i = 0; i < endWord.length(); i++){
+                // 循环这一位被替换成25个其他字母的情况
+                for(char letter = 'a'; letter <= 'z'; letter++){
+                    StringBuilder newWord = new StringBuilder(currWord);
+                    newWord.setCharAt(i, letter);
+                    if(endWord.equals(newWord.toString())){
+                        return step;    
+                    } else if(wordDict.contains(newWord.toString())){
+                        wordDict.remove(newWord.toString());
+                        queue.offer(newWord.toString());
+                    }
+                }
+            } 
+        }
+        step++;
+    }
+    return 0;
+}
+
+
+/**
+* Given two words (beginWord and endWord), and a dictionary's word list, find all shortest transformation sequence(s) from beginWord to endWord, such that:
+* 
+* Only one letter can be changed at a time
+* Each transformed word must exist in the word list. Note that beginWord is not a transformed word.
+* For example,
+* 
+* Given:
+* beginWord = "hit"
+* endWord = "cog"
+* wordList = ["hot","dot","dog","lot","log","cog"]
+* Return
+*   [
+*     ["hit","hot","dot","dog","cog"],
+*     ["hit","hot","lot","log","cog"]
+*   ]
+* Note:
+* Return an empty list if there is no such transformation sequence.
+* All words have the same length.
+* All words contain only lowercase alphabetic characters.
+* You may assume no duplicates in the word list.
+* You may assume beginWord and endWord are non-empty and are not the same.
+* UPDATE (2017/1/20):
+* The wordList parameter had been changed to a list of strings (instead of a set of strings). Please reload the code definition to get the latest changes.
+*/
+
+/*
+复杂度
+时间：
+bfs:每个节点只入队一次:n*26^lenOfWord
+dfs:26^lenOfWord
+思路：bfs+dfs
+要返回所有的结果，考虑dfs,因为用BFS相对于DFS的劣势就是不方便存储结果.但是直接应用DFS复杂度会很高，因为只要知道结尾就好了，不用继续往下搜。
+所以问题就转化成怎样用DFS的同时又可以限制DFS的深度，所以可以BFS与DFS结合 
+先用BFS搜到结尾字符串，然后把中途所有的字符串及其跟起始字符的edit distance存在一个map里。这样的话，下一步就可以从结尾字符串开始DFS，只有Map内的字符串才考虑继续DFS，直至搜到起始字符。
+
+注意：
+为什么不从起始字符串开始DFS直至搜到结尾字符串，而是反过来？
+想像一个图，如果从起始字符串开始搜，到最后一层的话会有很多无效搜索，因为最后那层只需要找到结尾字符串，那么多无效的搜索到最一层太浪费时间。
+反之，如果我们从结尾字符串开始DFS, 我们把起始层控制在一个字符串，整个图先越来越宽，然后越来越窄直到起始字符串，而非一直越来越宽直到结尾字符串那层。
+*/
+
+public class WordLadderII {
+  public List<List<String>> findLadders(String beginWord, String endWord, List<String> wordList) {
+    List<List<String>> res = new ArrayList<List<String>>();
+    if (wordList == null || wordList.size() == 0) return res;
+    Set<String> dict = new HashSet<String>();
+    for (String str : wordList) {
+      dict.add(str);  
+    }
+    cod -> coe -> cwe -> qwe
+    Map<String, Integer> dist = new HashMap<String, Integer>();//宽搜过程中，遇到的新词跟root的distance
+    getDist(beginWord, endWord, dict, dist);
+    if (!dist.containsKey(endWord)) return res;
+    List<String> path = new ArrayList<String>();
+    path.add(endWord);
+    getAllMinPath(res, path, dist, endWord, beginWord);
+    return res;
+  }
+  
+  //先BFS得出从beginWord到endWord的最短距离,方便之后的DFS剪枝.BFS过程中记录所有中间路径的可能单词以及该词跟startWord的距离
+  private void getDist(String beginWord, String endWord, Set<String> dict, Map<String, Integer> dist) {
+    dist.put(beginWord, 1);
+    Queue<String> queue = new LinkedList<String>();
+    queue.offer(beginWord);
+    while (!queue.isEmpty()) {
+      String cur = queue.poll();
+      for (int i = 0; i < cur.length(); i++) {
+        char[] curArr = cur.toCharArray();
+        for (char c = 'a'; c <= 'z'; c++) {
+          curArr[i] = c;
+          String tmp = new String(curArr);
+          //剪枝 只有字典里有的词才继续搜索
+          if (dict.contains(tmp)) {
+            if (tmp.equals(endWord)) {
+              dist.put(tmp, dist.get(cur)+1);
+              return;
+            }
+            //剪枝 每个词只入队一次
+            if (!dist.containsKey(tmp)) {
+              dist.put(tmp, dist.get(cur)+1);
+              queue.offer(tmp); 
+            }
+          }
+        }
+      }
+    }    
+  }
+  
+  private void getAllMinPath(List<List<String>> res, List<String> path, Map<String, Integer> dist, String cur, String beginWord) {
+    if (cur.equals(beginWord)) {
+      Collections.reverse(path);
+      res.add(new ArrayList<String>(path));
+      Collections.reverse(path);
+      return;
+    }
+    for (int i = 0; i < cur.length(); i++) {
+      char[] curArr = cur.toCharArray();
+      for (char c = 'a'; c <= 'z'; c++) {
+        curArr[i] = c;
+        String next = new String(curArr);
+        //剪枝 新生成的词只有满足下面两个条件才继续深搜：
+        //1.该词在哈希表里面存在 2.该词跟上一个词距离为1
+        if (dist.containsKey(next) && dist.get(cur) - dist.get(next) == 1) {
+          path.add(next);
+          getAllMinPath(res, path, dist, next, beginWord);
+          path.remove(path.size()-1);
+        }
+      }
+    }
+  }
+}
+
+/**
+* A gene string can be represented by an 8-character long string, with choices from "A", "C", "G", "T".
+* 
+* Suppose we need to investigate about a mutation (mutation from "start" to "end"), where ONE mutation is defined as ONE single character changed in the gene string.
+* 
+* For example, "AACCGGTT" -> "AACCGGTA" is 1 mutation.
+* 
+* Also, there is a given gene "bank", which records all the valid gene mutations. A gene must be in the bank to make it a valid gene string.
+* 
+* Now, given 3 things - start, end, bank, your task is to determine what is the minimum number of mutations needed to mutate from "start" to "end". If there is no such a mutation, return -1.
+* 
+* Note:
+* 
+* Starting point is assumed to be valid, so it might not be included in the bank.
+* If multiple mutations are needed, all mutations during in the sequence must be valid.
+* You may assume start and end string is not the same.
+* Example 1:
+* 
+* start: "AACCGGTT"
+* end:   "AACCGGTA"
+* bank: ["AACCGGTA"]
+* 
+* return: 1
+* Example 2:
+* 
+* start: "AACCGGTT"
+* end:   "AAACGGTA"
+* bank: ["AACCGGTA", "AACCGCTA", "AAACGGTA"]
+* 
+* return: 2
+* Example 3:
+* 
+* start: "AAAAACCC"
+* end:   "AACCCCCC"
+* bank: ["AAAACCCC", "AAACCCCC", "AACCCCCC"]
+* 
+* return: 3
+*/
+
+/*
+复杂度
+时间：O(4^n) 空间：O(n)
+
+思路：bfs
+跟word ladder一样思路
+*/
+
+public class MinimumGeneticMutation {
+  public int minMutation(String start, String end, String[] bank) {
+    if (start == null || end == null || start.length() != end.length()) return -1;
+    int steps = 0;
+    char[] mutations = new char[]{'A', 'C', 'G', 'T'};
+    // transfer array to Set in order to get O(1) search time in bfs
+    HashSet<String> validGene = new HashSet<String>();
+    for (String str : bank) {
+      validGene.add(str);
+    }
+    // end sequence must exsit in Set if valid
+    if (!validGene.contains(end)) return -1;
+    // start point can be removed at first since it's valid anyway
+    if (validGene.contains(start)) validGene.remove(start);
+    Queue<String> q = new LinkedList<String>();
+    q.offer(start);
+    while (!q.isEmpty()) {
+      int size = q.size();
+      for (int k = 0; k < size; k++) {
+        String cur = q.poll();
+        for (int i = 0; i < cur.length(); i++) {
+          for (char c : mutations) {
+            StringBuilder sb = new StringBuilder(cur);
+            sb.setCharAt(i, c);
+            String afterMutation = sb.toString();
+            if (afterMutation.equals(end)) return steps+1;
+            // remove after mutation sequence and enqueue if valid
+            if (validGene.contains(afterMutation)) {
+              validGene.remove(afterMutation);
+              q.offer(afterMutation);
+            }
+          }
+        }
+      }
+      steps++;
+    }
+    return -1;
+  }
+}
+
+
+/**
+* Given a binary tree
+* 
+*     struct TreeLinkNode {
+*       TreeLinkNode *left;
+*       TreeLinkNode *right;
+*       TreeLinkNode *next;
+*     }
+* Populate each next pointer to point to its next right node. If there is no next right node, the next pointer should be set to NULL.
+* 
+* Initially, all next pointers are set to NULL.
+* 
+* Note:
+* 
+* You may only use constant extra space.
+* You may assume that it is a perfect binary tree (ie, all leaves are at the same level, and every parent has two children).
+* For example,
+* Given the following perfect binary tree,
+*          1
+*        /  \
+*       2    3
+*      / \  / \
+*     4  5  6  7
+* After calling your function, the tree should look like:
+*          1 -> NULL
+*        /  \
+*       2 -> 3 -> NULL
+*      / \  / \
+*     4->5->6->7 -> NULL
+*/
+
+/**
+ * Definition for binary tree with next pointer.
+ * public class TreeLinkNode {
+ *     int val;
+ *     TreeLinkNode left, right, next;
+ *     TreeLinkNode(int x) { val = x; }
+ * }
+ */
+ 
+/*
+这道题是要将一棵树的每一层维护成一个链表，树本身是给定的
+其实思路上很接近层序遍历Binary Tree Level Order Traversal，只是这里不需要额外维护一个队列
+因为这里每一层我们会维护成一个链表，这个链表其实就是每层起始的那个队列，
+因此我们只需要维护一个链表的起始指针就可以依次得到整个队列了 接下来就是有左加左入链表，有右加右入链表，
+知道链表没有元素了说明到达最底层了 算法的复杂度仍然是对每个结点访问一次，所以是O(n)，
+而空间上因为不需要额外空间来存储队列了，所以是O(1)
+这道题是树的层序遍历Binary Tree Level Order Traversal的扩展，操作上会更加繁琐一些，
+因为是通过维护层链表来完成遍历，不过本质上还是一次广度优先搜索
+*/
+ 
+public class PopulatingNextRightPointersInEachNode {
+    public void connect(TreeLinkNode root) {
+        if (root == null) {
+      return;
+    }
+    TreeLinkNode preHead = root;
+    TreeLinkNode pre = null;
+    TreeLinkNode curHead = null;
+    while (preHead != null) {
+      TreeLinkNode lastCur = preHead;
+      while (lastCur != null) {
+        if (lastCur.left != null) {
+          if (curHead == null) {
+            curHead = lastCur.left;
+            pre = curHead;
+          } else {
+            pre.next = lastCur.left;
+            pre = pre.next;
+          }
+        }
+        if (lastCur.right != null) {
+          if (curHead == null) {
+            curHead = lastCur.right;
+            pre = curHead;
+          } else {
+            pre.next = lastCur.right;
+            pre = pre.next;
+          }
+        }
+        lastCur = lastCur.next;
+      }
+      preHead = curHead;
+      curHead = null;
+    }
+    }
+}
+
+/**
+* Remove the minimum number of invalid parentheses in order to make the input string valid. Return all possible results.
+* 
+* Note: The input string may contain letters other than the parentheses ( and ).
+* 
+* Examples:
+* "()())()" -> ["()()()", "(())()"]
+* "(a)())()" -> ["(a)()()", "(a())()"]
+* ")(" -> [""]
+*/
+
+/*
+Solution 1: BFS + pruning 
+通过从输入字符串中移除每一个括号，生成新的字符串加入队列。
+
+如果从队列中取出的字符串是有效的，则加入结果列表。
+
+一旦发现有效的字符串，则不再向队列中补充新的可能字符串。
+
+根据BFS的性质，当首次从队列中发现有效字符串时，其去掉的括号数一定是最小的。
+
+而此时，队列中存在的元素与队头元素去掉的括号数的差值 ≤ 1
+
+并且，只有与队头元素去掉括号数目相同的元素才有可能是候选答案（根据括号匹配的性质可知）
+BFS也可应用剪枝策略 记录搜过的字符串
+
+Time complexity:
+
+In BFS we handle the states level by level, in the worst case, we need to handle all the levels, 
+we can analyze the time complexity level by level and add them up to get the final complexity.
+
+On the first level, there's only one string which is the input string s, let's say the length of it is n, 
+to check whether it's valid, we need O(n) time. On the second level, we remove one ( or ) from the first level, 
+so there are C(n, n-1) new strings, each of them has n-1 characters, and for each string, we need to check whether it's valid or not, 
+thus the total time complexity on this level is (n-1) x C(n, n-1). Come to the third level, 
+total time complexity is (n-2) x C(n, n-2), so on and so forth...
+
+Finally we have this formula:
+
+T(n) = n x C(n, n) + (n-1) x C(n, n-1) + ... + 1 x C(n, 1) = n x 2^(n-1).
+*/
+
+public class RemoveInvalidParentheses {
+  public List<String> removeInvalidParentheses(String s) {
+    List<String> res = new ArrayList<String>();
+    if (s == null) return res;
+    
+  Set<String> visited = new HashSet<String>(); // keep tack of visited states
+    Queue<String> queue = new LinkedList<String>();
+
+    queue.offer(s);
+    visited.add(s);
+    boolean found = false;
+    while (!queue.isEmpty()) {
+    s = queue.poll();
+    
+    if (isValid(s)) {
+      // found one valid result, put it into res
+    res.add(s);
+    found = true;
+    }
+    if (found) continue;
+    
+    // generate every possible cadidates to check
+    for(int i = 0; i < s.length(); i++) {
+    // only remove '(' or ')'
+        if (s.charAt(i) != '(' && s.charAt(i) != ')') continue;    
+      String t = s.substring(0, i) + s.substring(i+1);
+    if(!visited.contains(t)) { // for each unvisited state, add into queue
+      queue.offer(t);
+      visited.add(t);
+    }
+    }
+  }
+  return res;  
+  }
+
+  // helper function to check if s contains valid parantheses
+   boolean isValid(String s) {
+      int cnt = 0; 
+      for (int i = 0; i < s.length(); i++) {
+        char c = s.charAt(i);
+        if (c == '(') cnt++;
+        if (c == ')') {
+      if (cnt == 0) return false;
+      cnt--;
+    }
+      }
+      return cnt == 0;
+    } 
+} 
+
+
+（^ w ^)
+
+
+^ _ ^
+
+
+\(O _ O)/
+  
+    /\/\____ 
+   /oo      \
+  (..)       |~~  <--- Jueran Li
+   \________/
+    vv   vv
+
+
+
