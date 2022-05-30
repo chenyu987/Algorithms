@@ -25,7 +25,7 @@ private void dfs(int[] nums, int target, int offset, ArrayList<ArrayList<Integer
     else {
         // dfs的难点也是精髓，backtracking过程
         // i的起始点要注意, 如果是permutation排列的话要从0开始，因为结果无序，
-        // 保持不取相同点的任务由visited[]数组承担（当然这里相同数值的数字需要有序不然会有duplication，这个逻辑通过visited[]相对位置来看，或者permutationI的方法简单查重)
+        // 然而重复数字在结果中有序(1一号一定在1二号前面）保持不取相同点的任务由visited[]数组承担（当然这里相同数值的数字需要有序不然会有结果duplication，这个逻辑通过visited[]相对位置来看，或者permutationI的方法简单查重)
         // 如果结果是有序的（eg由大到小）那么这里是从offset开始
         for (int i = offset; i < nums.length; i++) {
             // important: check duplication, this means we one use the element that has this value once (same as permutationsII)
