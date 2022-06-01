@@ -1,0 +1,221 @@
+// Number of Islands
+// Given a 2d grid map of '1's (land) and '0's (water), count the number of islands. An island is surrounded by water and is formed by connecting adjacent lands horizontally or vertically. You may assume all four edges of the grid are all surrounded by water.
+
+// Example 1:
+
+// 11110
+// 11010
+// 11000
+// 00000
+// Answer: 1
+
+// Example 2:
+
+// 11000
+// 11000
+// 00100
+// 00011
+// Answer: 3
+
+class Solution {
+    public int numIslands(char[][] grid) {
+        int result = 0;
+        int[] di = {0, 1, 0, -1};
+        int[] dj = {-1, 0, 1, 0};
+        for (int i = 0; i < grid.length; i++) {
+            for (int j = 0; j < grid[0].length; j++) {
+                if (grid[i][j] == '1') {
+                    result++;
+                    dfs(grid, di, dj, i, j);
+                }
+            }
+        }
+        return result;
+    }
+    
+    private void dfs(char[][] grid,int[] di, int[]dj, int i, int j) {
+        grid[i][j] = '0';
+        for (int k = 0; k < 4; k++){
+            int newi = i + di[k];
+            int newj = j + dj[k];
+            if (newi < 0 || newi > grid.length - 1 || newj < 0 || newj > grid[0].length - 1) continue;
+            else {
+                if (grid[newi][newj] == '1') {
+                    dfs(grid, di, dj, newi, newj);
+                }
+            }
+        }
+    }
+}
+
+
+
+
+/**
+Surrounded Regions
+* Given a 2D board containing 'X' and 'O' (the letter O), capture all regions surrounded by 'X'.
+* 
+* A region is captured by flipping all 'O's into 'X's in that surrounded region.
+* 
+* For example,
+* X X X X
+* X O O X
+* X X O X
+* X O X X
+* After running your function, the board should be:
+* 
+* X X X X
+* X X O X
+* X O O X
+* X O X X
+*/
+
+
+
+==>
+
+
+* X X X X
+* X X X X
+* X O X X
+* X O X X
+*/
+
+public class SurroundedRegions {
+  public void solve(char[][] board) {
+    if (board == null || board.length <= 1 || board[0].length <= 1) return;
+    int row = board.length;
+    int col = board[0].length;
+    //dfs处理左右边界上的'O',换成'#'
+    for (int i = 0; i < row; i++) {
+      if (board[i][0] == 'O') {
+        fill(board, i, 0);
+      }
+      if (board[i][col-1] == 'O') {
+        fill(board, i, col-1);
+      }
+    }
+    // dfs处理上下边界上的'O',换成'#'
+    for (int j = 0; j < col; j++) {
+      if (board[0][j] == 'O') {
+        fill(board, 0, j);
+      }
+      if (board[row-1][j] == 'O') {
+        fill(board, row-1, j);
+      }
+    }
+    // 把没有被染色的'O',换成'X'
+    for (int i = 0; i < row; i++) {
+      for (int j = 0; j < col; j++) {
+        if (board[i][j] == 'O') {
+          board[i][j] = 'X';
+        }
+      }
+    }
+     // 把被染色成'#',换回'O'
+    for (int i = 0; i < row; i++) {
+      for (int j = 0; j < col; j++) {
+        if (board[i][j] == '#') {
+          board[i][j] = 'O';
+        }
+      }
+    }
+  }
+  
+  private void fill(char[][] board, int i, int j) {
+    if (i < 0 || i >= board.length || j < 0 || j >= board[0].length || board[i][j] != 'O') return;
+    board[i][j] = '#';
+    // 向上染色
+    if (i - 1 >= 0 && board[i-1][j] == 'O') {
+      fill(board, i-1, j);
+    }
+    // 向下染色
+    if (i + 1 < board.length && board[i+1][j] == 'O') {
+      fill(board, i+1, j);
+    }
+    // 向左染色
+    if (j - 1 >= 0 && board[i][j-1] == 'O') {
+      fill(board, i, j-1);
+    }
+    // 向右染色
+    if (j + 1 < board[0].length && board[i][j+1] == 'O') {
+      fill(board, i, j+1);
+    }
+  }
+}
+
+
+// Word Search
+/**
+* Given a 2D board and a word, find if the word exists in the grid.
+* 
+* The word can be constructed from letters of sequentially adjacent cell, where "adjacent" cells are those horizontally or vertically neighboring. The same letter cell may not be used more than once.
+* 
+* For example,
+* Given board =
+* 
+* [
+*   ['A','B','C','E'],
+*   ['S','F','C','S'],
+*   ['A','D','E','E']
+* ]
+* word = "ABCCED", -> returns true,
+* word = "SEE", -> returns true,
+* word = "ABCB", -> returns false.
+*/
+
+
+/*
+复杂度
+时间 O(m^2*n^2) 空间(n*m)
+思路： 深搜
+从某一个元素出发，往上下左右深度搜索是否有相等于word的字符串
+注意每次从一个元素出发时要重置访问标记（虽然单次搜索字符不能重复使用，但是每次从一个新的元素出发，字符可以复用）
+follow up: what if char can be used mutiple times?
+*/
+
+
+class Solution {
+    int[][] directions={{1,0},{-1,0},{0,1},{0,-1}};
+    int n;
+    int m;
+    public boolean exist(char[][] board, String word) {
+        n=board.length;
+        m=board[0].length;
+        for(int i=0;i<n;i++){
+            for(int j=0;j<m;j++){
+                if(backtrack(board,word,0,i,j,new int[n][m])==true){
+                    return true;
+                }
+            }
+        }
+        
+        return false;
+    }
+    public boolean backtrack(char[][] board,String word,int ptr,int i,int j,int[][] visited){
+        if(ptr==word.length()-1){
+            if(word.charAt(ptr)==board[i][j]){
+                return true;
+            }
+            return false;
+        }
+        if(word.charAt(ptr)!=board[i][j]){
+            
+            return false;
+        }
+        
+        visited[i][j]=1;
+        boolean flag=false;
+        for(int[] direction:directions){
+            int x=i+direction[0];
+            int y=j+direction[1];
+            if(x>=0 && x<n && y>=0 && y<m && visited[x][y]!=1){
+                
+                flag=flag || backtrack(board,word,ptr+1,x,y,visited);
+                visited[x][y]=0;
+            }
+        }
+        return flag;
+    }
+}
+            
