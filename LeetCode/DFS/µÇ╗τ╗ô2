@@ -121,7 +121,37 @@ public class Solution {
     }
 }
 
-
+//revised
+class Solution {
+    public int numIslands(char[][] grid) {
+        int result = 0;
+        int[] di = {0, 1, 0, -1};
+        int[] dj = {-1, 0, 1, 0};
+        for (int i = 0; i < grid.length; i++) {
+            for (int j = 0; j < grid[0].length; j++) {
+                if (grid[i][j] == '1') {
+                    result++;
+                    dfs(grid, di, dj, i, j);
+                }
+            }
+        }
+        return result;
+    }
+    
+    private void dfs(char[][] grid,int[] di, int[]dj, int i, int j) {
+        grid[i][j] = '0';
+        for (int k = 0; k < 4; k++){
+            int newi = i + di[k];
+            int newj = j + dj[k];
+            if (newi < 0 || newi > grid.length - 1 || newj < 0 || newj > grid[0].length - 1) continue;
+            else {
+                if (grid[newi][newj] == '1') {
+                    dfs(grid, di, dj, newi, newj);
+                }
+            }
+        }
+    }
+}
 
 Pixels
 From my interview with SnapChat
