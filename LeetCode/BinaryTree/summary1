@@ -1,0 +1,680 @@
+/*
+Balanced Binary Tree
+Given a binary tree, determine if it is height-balanced.
+For this problem, a height-balanced binary tree is defined as a binary tree in which the depth of the two subtrees of every node never differ by more than 1.
+*/
+
+复杂度
+时间 O(N) 空间 O(h) 递归栈空间
+
+思路
+非平衡的条件是有两个叶子节点的深度相差大于1，最直接的想法就是把左子树和右子树的高度都算出来，如果相差大于1则说明不是平衡的。在递归中，从叶子结点开始一层层返回高度，叶子结点是1。我们返回-1代表非平衡，返回自然数代表有效的子树高度。
+
+代码
+public class Solution {
+    public boolean isBalanced(TreeNode root) {
+        if(root==null) return true;
+        int left = findHeight(root.left);
+        int right = findHeight(root.right);
+        return left != -1 && right != -1 && Math.abs(left-right)<=1;
+    }
+    
+    private int findHeight(TreeNode root){
+        if(root == null) return 0;
+        int left = findHeight(root.left);
+        int right = findHeight(root.right);
+        if(left == -1 || right == -1 || Math.abs(left-right) > 1) return -1;
+        return Math.max(left, right)+1;
+    }
+}
+
+
+inary Tree Inorder Traversal
+Given a binary tree, return the inorder traversal of its nodes' values.
+
+For example: Given binary tree {1,#,2,3},
+
+   1
+    \
+     2
+    /
+   3
+return [1,3,2].
+栈迭代
+复杂度
+时间 O(b^(h+1)-1) 空间 O(h) 递归栈空间 对于二叉树b=2
+
+思路
+用栈中序遍历没有先序遍历那么直观，因为我们不能马上pop出当前元素，而要先把它的左子树都遍历完才能pop它自己。所有我们先将将最左边的所有节点都push进栈，然后再依次pop并记录值，每pop一个元素后再看它有没有右子树，如果右的话，我们再将它的右节点和右子树中最左边的节点都push进栈，再依次pop。
+
+代码
+public class Solution {
+    public List<Integer> inorderTraversal(TreeNode root) {
+        List<Integer> res = new LinkedList<Integer>();
+        Stack<TreeNode> s = new Stack<TreeNode>();
+        //先将最左边的节点都push进栈
+        if(root!=null){
+            pushAllTheLeft(s, root);
+        }
+        while(!s.isEmpty()){
+            TreeNode curr = s.pop();
+            res.add(curr.val);
+            //如果有右子树，将右节点和右子树的最左边的节点都push进栈
+            if(curr.right != null){
+                pushAllTheLeft(s, curr.right);
+            }
+        }
+        return res;
+    }
+    
+    private void pushAllTheLeft(Stack<TreeNode> s, TreeNode root){
+        s.push(root);
+        while(root.left!=null){
+            root = root.left;
+            s.push(root);
+        }
+    }
+}
+
+// Given a binary tree, find the maximum path sum.
+
+// For this problem, a path is defined as any sequence of nodes from some starting node to any node in the tree along the parent-child connections. The path must contain at least one node and does not need to go through the root.
+
+// For example:
+// Given the below binary tree,
+
+//       1
+//       / \
+//      2   3
+// Return 6.
+
+public class Solution {
+    int maxValue;
+    
+    public int maxPathSum(TreeNode root) {
+        maxValue = Integer.MIN_VALUE;
+        // 没人接没关系，像stack.pop()一样；
+        maxPathDown(root);
+        return maxValue;
+    }
+    
+    private int maxPathDown(TreeNode node) {
+        if (node == null) return 0;
+        int left = Math.max(0, maxPathDown(node.left));
+        int right = Math.max(0, maxPathDown(node.right));
+        maxValue = Math.max(maxValue, left + right + node.val);
+        return Math.max(left, right) + node.val;
+    }
+}
+
+
+public class Solution {
+    
+    private int max = Integer.MIN_VALUE;
+    
+    public int maxPathSum(TreeNode root) {
+        helper(root);
+        return max;
+    }
+    
+    public int helper(TreeNode root) {
+        if(root == null) return 0;
+        int left = helper(root.left);
+        int right = helper(root.right);
+        //连接父节点的最大路径是一、二、四这三种情况的最大值
+        int currSum = Math.max(Math.max(left + root.val, right + root.val), root.val);
+        //当前节点的最大路径是一、二、三、四这四种情况的最大值
+        int currMax = Math.max(currSum, left + right + root.val);
+        //用当前最大来更新全局最大
+        max = Math.max(currMax, max);
+        return currSum;
+    }
+}
+
+/**
+* Given a binary tree, return the postorder traversal of its nodes' values.
+* 
+* For example:
+* Given binary tree {1,#,2,3},
+*    1
+*     \
+*      2
+*     /
+*    3
+* return [3,2,1].
+* 
+* Note: Recursive solution is trivial, could you do it iteratively?
+*/
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode(int x) { val = x; }
+ * }
+ */
+ 
+/*
+解法1
+复杂度
+时间：O(n) 空间:O(logN)
+思路：递归
+*/
+ 
+public class BinaryTreePostorderTraversal {
+  public List<Integer> postorderTraversal(TreeNode root) {
+    List<Integer> res = new ArrayList<Integer>();
+		helper(root, res);
+		return res;
+  }
+	
+	private void helper(TreeNode root, List<Integer> res) {
+		if (root == null) return;
+		helper(root.left, res);
+		helper(root.right, res);
+		res.add(root.val);
+	}
+}
+
+
+#1 Binary Tree Preorder Traversal
+Q:Given a binary tree, return the preorder traversal of its nodes' values. 
+
+For example: 
+Given binary tree {1,#,2,3}, 
+
+ 1 
+   \ 
+     2 
+    / 
+  3 
+return [1,2,3]. 
+
+
+//Version 1: Traverse
+public class Solution {
+    // traverse法需要建另一个函数，dc法不用
+    public ArrayList<Integer> preorderTraversal(TreeNode root) {
+        ArrayList<Integer> result = new ArrayList<Integer>();
+        traverse(root, result);
+        return result;
+    }
+    // 递归的定义:把root为跟的preorder加入result里面
+    private void traverse(TreeNode root, ArrayList<Integer> result) {
+     //递归的出口
+        if (root == null) {
+            return;
+        }
+     //递归的拆解
+        result.add(root.val);
+        traverse(root.left, result);
+        traverse(root.right, result);
+    }
+}
+
+public ArrayList<Integer> preorderTraversal(TreeNode root)
+
+//Version 2: Divide & Conquer
+public class Solution {
+    // dc法直接在本身进行
+    public ArrayList<Integer> preorderTraversal(TreeNode root) {
+        ArrayList<Integer> result = new ArrayList<Integer>();
+        // null or leaf
+        if (root == null) {
+            return result;
+        }
+
+        // Divide
+        ArrayList<Integer> left = preorderTraversal(root.left);
+        ArrayList<Integer> right = preorderTraversal(root.right);
+
+        // Conquer
+        result.add(root.val);
+        result.addAll(left);
+        result.addAll(right);
+        return result;
+    }
+}
+
+
+Binary Tree Right Side View
+Given a binary tree, imagine yourself standing on the right side of it, return the values of the nodes you can see ordered from top to bottom.
+
+For example: Given the following binary tree,
+
+   1            <---
+ /   \
+2     3         <---
+ \     \
+  5     4       <---
+  
+
+   1            <---
+ /   \
+2     3         <---
+ \   
+  5     
+You should return [1, 3, 4].
+
+// BFS方法（更好想）
+    public List<Integer> rightSideView(TreeNode root) {
+        // reverse level traversal
+        List<Integer> result = new ArrayList();
+        Queue<TreeNode> queue = new LinkedList();
+        if (root == null) return result;
+        
+        queue.offer(root);
+        while (queue.size() != 0) {
+            int size = queue.size();
+            for (int i=0; i<size; i++) {
+                TreeNode cur = queue.poll();
+                if (i == 0) result.add(cur.val);
+                if (cur.right != null) queue.offer(cur.right);
+                if (cur.left != null) queue.offer(cur.left);
+            }
+            
+        }
+        return result;
+    }
+
+
+/*
+由于每层只选择一个节点，所以优先访问右侧的节点。当List<Integet>的大小与层的深度一致时，说明已经加入了最右侧的节点，
+该层的其他节点无需再加入
+*/
+public class BinaryTreeRightSideView {
+  public List<Integer> rightSideView(TreeNode root) {
+    List<Integer> res = new ArrayList<Integer>();
+    if (root == null) {
+      return res;
+    }
+    helper(root, res, 0);
+    return res;
+  }
+  
+  private void helper(TreeNode root, List<Integer> res, int level) {
+    if (root == null) {
+      return;
+    }
+    if (res.size() == level) {
+      res.add(root.val);
+    } 
+    helper(root.right, res, level+1);
+    helper(root.left, res, level+1);
+  }
+}
+
+
+/**
+* Given a binary tree where all the right nodes are either leaf nodes with a sibling (a left node that shares the same parent node) or empty, flip it upside down and turn it into a tree where the original right nodes turned into left leaf nodes. Return the new root.
+* 
+* For example:Given a binary tree {1,2,3,4,5},
+* 
+*     1
+*    / \
+*   2   3
+*  / \
+* 4   5
+* return the root of the binary tree [4,5,2,#,#,3,1].
+* 
+*    4
+*   / \
+*  5   2
+*     / \
+*    3   1  
+* 	 
+*/
+
+/*
+solution 1
+复杂度
+时间O(n) 空间O(n)
+思路：递归
+关于upside down:
+   root      -->     left   
+  /    \            /    \
+left   right     right   root
+其实就是三个节点顺时针旋转 直观滴想 整个树upside down后的根是原树的最左边的叶节点
+对给定的例子分析，将最左左子树4-2-5上下颠倒后 4作为新根 与1,3构成新子树结构 4-1-3 此时出现问题
+把4旋转到树根后 如何解决1 3及其子树 和4的子树的连接问题 根据所给的例子 意思是把1-3连接到4最右孩子的上面
+而且3变成左孩子 1变成右孩子 
+*/
+
+public class BinaryTreeUpsideDown {
+  public TreeNode upsideDownBinaryTree(TreeNode root) {
+		if (root == null) return root;
+		//每层递归中记录当前节点，当前左孩子和当前右孩子，以便递归返回的时候修改连接关系
+		TreeNode parent = root;
+		TreeNode leftChild = root.left;
+		TreeNode rightChild = root.right;
+		if (leftChild != null) {
+			TreeNode newRoot = upsideDownBinaryTree(left);
+			leftChild.left = rightChild;
+			leftChild.right = parent;
+			return newRoot;
+		}
+		return root; // if leftChild == null
+  }
+}  
+
+
+
+/**
+* Given a binary tree where all the right nodes are either leaf nodes with a sibling (a left node that shares the same parent node) or empty, flip it upside down and turn it into a tree where the original right nodes turned into left leaf nodes. Return the new root.
+* 
+* For example:Given a binary tree {1,2,3,4,5},
+* 
+*     1
+*    / \
+*   2   3
+*  / \
+* 4   5
+* return the root of the binary tree [4,5,2,#,#,3,1].
+* 
+*    4
+*   / \
+*  5   2
+*     / \
+*    3   1  
+*    
+*/
+
+   root
+  /   \
+left  right
+ 
+ ==>
+   left
+  /   \
+right  root
+
+   root
+  /   \
+null  null (there is no sibling)
+ 
+
+public TreeNode upsideDown(TreeNode root) {
+  if (root == null) return root;
+  TreeNode parent = root;
+  TreeNode left = root.left;
+  TreeNode right = root.right;
+  if (left != null) {
+    TreeNode newRoot = upsideDown(left);
+    left.left = right;
+    left.right = parent;
+    return newRoot;
+  }
+  //there is no sibling;
+
+
+Closest Binary Search Tree Value I
+Given a non-empty binary search tree and a target value, find the value in the BST that is closest to the target.
+
+Note: Given target value is a floating point. You are guaranteed to have only one unique value in the BST that is closest to the target.
+
+public class ClosestBinarySearchTreeValue {
+  public int closestValue(TreeNode root, double target) {
+    TreeNode subRoot = null;
+  // pick up one of subtrees
+    if (target < root.val) {
+    subRoot = root.left;
+  } else {
+    subRoot = root.right;
+  }  
+  // no children -> recursion hits leaf
+    if (subRoot == null) {
+      return root.val;
+    }
+  // find closest val recursively
+    int closest = closestValue(subRoot, target);
+ 
+    double diffToRoot = Math.abs(root.val - target);
+    double diffToSubRoot = Math.abs(closest - target);
+    if (diffToRoot < diffToSubRoot) {
+      return root.val;
+    } else {
+      return closest;
+    }  
+  }
+} 
+
+
+// Convert Sorted Array to Binary Search Tree
+// Given an array where elements are sorted in ascending order, convert it to a height balanced BST.
+// 递归法
+// 复杂度
+// 时间 O(N) 空间 O(H)
+
+// 思路
+// 和用链表建树的思路相似，实现更加简单，因为数组支持随机查询，我们可以直接访问中点而无须遍历链表。
+
+// 代码
+
+public class Solution {
+    public TreeNode sortedArrayToBST(int[] nums) {
+        return buildTree(nums, 0, nums.length - 1);
+    }
+    
+    private TreeNode buildTree(int[] nums, int start, int end){
+        if(start > end){
+            return null;
+        }
+        int mid = start + (end - start) / 2;
+        // 先递归的计算左子树
+        TreeNode left = buildTree(nums, start, mid - 1);
+        // 创造根节点
+        TreeNode root = new TreeNode(nums[mid]);
+        // 最后递归的计算右子树
+        TreeNode right = buildTree(nums, mid + 1, end);
+        root.left = left;
+        root.right = right;
+        return root;
+    }
+}
+
+
+Convert Sorted List to Binary Search Tree
+Given a singly linked list where elements are sorted in ascending order, convert it to a height balanced BST.
+递归法
+复杂度
+时间 O(N) 空间 O(H)
+
+思路
+建树比较方便的方法是递归，对于有序链表，高度平衡BST的根节点是其中点，然后该根节点的左子树的根节点，又是左半边的中点，该根节点的右子树的根节点，又是右半边的中点，以此往复，链表第一个节点，就是最左边左子树的根节点，而最左边左子树的左节点和右节点都是空。我们可以用start和end两个值来限定子树在链表中的位置，通过递归的方式，实际上可以实现顺序遍历链表然后建树的过程。不过java中，需要将链表当前遍历到节点作为全局变量，保证递归过程中链表也是顺序遍历的。
+
+代码
+
+public class Solution {
+    
+    ListNode curr;
+    
+    public TreeNode sortedListToBST(ListNode head) {
+        curr = head;
+        int len = 0;
+        // 先计算出链表的长度
+        while(head != null){
+            head = head.next;
+            len++;
+        }
+        // 开始建树
+        return buildTree(0, len - 1);
+    }
+    
+    private TreeNode buildTree(int start, int end){
+        // 如果start>end，说明子树已经小到没有节点了，直接返回null
+        if(start > end){
+            return null;
+        }
+        // 找到中点
+        int mid = start + (end - start) / 2;
+        // 先递归的计算左子树
+        TreeNode left = buildTree(start, mid - 1);
+        // 然后建立根节点
+        TreeNode root = new TreeNode(curr.val);
+        // 链表顺序遍历
+        curr = curr.next;
+        // 最后计算右子树
+        TreeNode right = buildTree(mid + 1, end);
+        // 将三个节点连接起来
+        root.left = left;
+        root.right = right;
+        return root;
+    }
+}
+
+
+
+
+
+/**
+* You are given an integer array nums and you have to return a new counts array. The counts array has the property where counts[i] is the number of smaller elements to the right of nums[i].
+* 
+* Example:
+* 
+* Given nums = [5, 2, 6, 1]
+*                     i
+* To the right of 5 there are 2 smaller elements (2 and 1).
+* To the right of 2 there is only 1 smaller element (1).
+* To the right of 6 there is 1 smaller element (1).
+* To the right of 1 there is 0 smaller element.
+* Return the array [2, 1, 1, 0].
+*/
+
+/*
+复杂度：
+time： O(n^2) space:O(n)
+从右向左遍历数组并且构建BST.当前节点node左子树全部是值小于或者等于当前节点val的节点. 
+当前结点node.count就是左子树节点个数之和
+每次addNode时假如发现逆序,则可以取当前节点的count值返回
+time complexicy at worse case is O(n^2) since it may not be a balanced BST.
+优化：
+把结果全部加入到List<Integer>里，最后再reverse这个list，要比每次list.add(0, count)速度要快很多
+*/
+
+class CountOfSmallerNumbersAfterSelf {
+  private class TreeNode {
+    int val = 0;
+    int cnt = 1;
+    TreeNode left; 
+    TreeNode right;
+    public TreeNode(int val) {
+      this.val = val;
+    }
+  }
+  public List<Integer> countSmaller(int[] nums) {
+    List<Integer> res = new ArrayList<Integer>();
+    if (nums == null || nums.length == 0) return res;
+    TreeNode root = new TreeNode(nums[nums.length-1]);
+    res.add(0);
+    
+    for (int i = nums.length - 2; i >= 0; i--) {
+      int cnt = addNode(root, nums[i]);
+      res.add(cnt);
+    }
+    Collections.reverse(res);
+    return res;
+  }
+  
+  private int addNode(TreeNode root, int val) {
+    int curCnt = 0;
+    while (true) {
+      if (val <= root.val) {
+        root.cnt++;
+        if (root.left == null) {
+          root.left = new TreeNode(val);
+          break;
+        } else {
+          root = root.left;
+        }
+      } else {
+        curCnt += root.cnt;
+        if (root.right == null) {
+          root.right = new TreeNode(val);
+          break;
+        } else {
+          root = root.right;
+        }
+      }
+    }
+    return curCnt;
+  }
+}
+
+res = [0, 1, 2, 2]
+
+nums = [5, 2, 6, 1]
+        i  
+   
+   
+   curCnt = 1;
+          
+                     root = 1  <- 
+                           *1
+                             \ 
+                              6  <- 
+                              *1
+                              
+=》
+
+                     root = 1  <- 
+                           *1
+                             \ 
+                              6  <- 
+                              *2
+                            /
+                           2 
+                          *1
+                       
+=》
+curCnt = 1;
+                     root = 1  <- 
+                           *1
+                             \ 
+                              6  <- 
+                              *2
+                            /
+                           2 
+                          *1
+                       
+                       =》
+curCnt = 2;
+                     root = 1  <- 
+                           *1
+                             \ 
+                              6  <- 
+                              *3
+                            /
+                           2 <-
+                          *1
+                       
+ =》
+curCnt = 2;
+                     root = 1  <- 
+                           *1
+                             \ 
+                              6  <- 
+                              *3
+                            /
+                           2 <-
+                           *1
+                             \ 
+                              5 
+                              *1
+                       
+                       
+worst scenario:                        
+                       1 
+                         2
+                       
+                          3 
+                       
+                            4 
+                       
+                              5
+                       
+                                6
+cur num = 7
+              
+1 + 2 + 3 + ... + n - 1 = O(n^2)
+
