@@ -1,0 +1,676 @@
+
+几下几点需要注意：
+1. 考察对数组的应用：下表一定一定一定不要越界，如何合理应用数组空间,将index和其他数据结构结合。
+2. 跟sorting结合。有一些冷门的排序法要掌握：桶排序,计数排序.
+3. 二分的时候基本上载体全是数组.
+4. 数组只是个载体，各种考点都可以用数组来考.
+        
+基本点：
+下标从0开始,从0开始，从0开始！！！！到len - 1!!!!
+从index到长度的转换也是一个考点
+        
+/**
+* best meeting point
+* A group of two or more people wants to meet and minimize the total travel distance. 
+* You are given a 2D grid of values 0 or 1, where each 1 marks the home of someone in the group. 
+* The distance is calculated using Manhattan Distance, where distance(p1, p2) = |p2.x - p1.x| + |p2.y - p1.y|.
+* For example, given three people living at (0,0), (0,4), and (2,2):
+* 1 - 0 - 0 - 0 - 1
+* |   |   |   |   |
+* 0 - 0 - 0 - 0 - 0
+* |   |   |   |   |
+* 0 - 0 - 1 - 0 - 0
+* The point (0,2) is an ideal meeting point, as the total travel
+* distance of 2+2+2=6 is minimal. So return 6.
+*/
+        
+例子：  
+1 -> 2 -> 3 <- 4           
+public int minTotalDistance(int[][] grid) {
+  List<Integer> xCor = new ArrayList<Integer>();
+  List<Integer> yCor = new ArrayList<Integer>();
+  
+  // get all coordinates
+  for (int i = 0; i < grid.length; i++) {
+    for (int j = 0; j < grid[0].length; j++) {
+      if (grid[i][j] == 1) {
+        xCor.add(i);
+        yCor.add(j);
+      }
+    }
+  }
+  int minDis = 0;
+  // calculate disctance from each xCor to middle points
+  // no sorting needed because previously we get xCor based on accending order of i
+  for (int i = 0; i < xCor.size(); i++) {
+    minDis += Math.abs(xCor.get(i) - xCor.get(xCor.size()/2);
+  }     
+  
+  Collections.sort(yCor);
+  for (int j = 0; j < yCor.size(); j++) {
+    minDis += Math.abs(yCor.get(j) - yCor.get(yCor.size()/2));
+  }
+}        
+ 
+        
+/**
+* Suppose you are at a party with n people (labeled from 0 to n - 1) and among them, there may exist one celebrity. The definition of a celebrity is that all the other n - 1 people know him/her but he/she does not know any of them.
+* 
+* Now you want to find out who the celebrity is or verify that there is not one. The only thing you are allowed to do is to ask questions like: "Hi, A. Do you know B?" to get information of whether A knows B. You need to find out the celebrity (or verify there is not one) by asking as few questions as possible (in the asymptotic sense).
+* 
+* You are given a helper function bool knows(a, b) which tells you whether A knows B. Implement a function int findCelebrity(n), your function should minimize the number of calls to knows.
+* 
+* Note: There will be exactly one celebrity if he/she is in the party. Return the celebrity's label if there is a celebrity in the party. If there is no celebrity, return -1.
+*/        
+ 
+                       
+public class FindTheCelebrity extends Relation {  
+  public int findCelebrity(int n) {  
+    int candidate = 0;
+  for (int i = 1; i < n; i++) {
+    if (knows(candidate, i)) {
+    candidate = i;
+    }
+  }
+  for (int i = 0; i < n; i++) {
+    if (candidate != i && (knows(candidate,i) || !knows(i, candidate))) {
+    return -1;
+    }
+  }
+  return candidate;
+  }  
+}                       
+                       
+        
+/**
+* According to the Wikipedia's article: "The Game of Life, also known simply as Life, is a cellular automaton devised by the British mathematician John Horton Conway in 1970."
+* 
+* Given a board with m by n cells, each cell has an initial state live (1) or dead (0). Each cell interacts with its eight neighbors (horizontal, vertical, diagonal) using the following four rules (taken from the above Wikipedia article):
+* 
+* Any live cell with fewer than two live neighbors dies, as if caused by under-population.
+* Any live cell with two or three live neighbors lives on to the next generation.
+* Any live cell with more than three live neighbors dies, as if by over-population..
+* Any dead cell with exactly three live neighbors becomes a live cell, as if by reproduction.
+* Write a function to compute the next state (after one update) of the board given its current state.
+* 
+* Follow up: 
+* Could you solve it in-place? Remember that the board needs to be updated at the same time: You cannot update some cells first and then use their updated values to update other cells.
+* In this question, we represent the board using a 2D array. In principle, the board is infinite, which would cause problems when the active area encroaches the border of the array. How would you address these problems?
+*/        
+        
+        
+  // 00 dead -> dead
+  // 01 live -> dead 
+  // 10 dead -> live
+  // 11 live -> live 
+  public void gameOfLife(int[][] board) {
+    if (board == null || board.length == 0 || board[0].length == 0) return;
+    int row = board.length;
+    int col = board[0].length;
+    
+   // define the direction of neighbors 
+   int[][] dirs = {{-1,-1}, {-1,0}, {-1, 1}, {0,-1}, {0,1}, {1,-1}, {1,0}, {1,1}};
+   for (int i = 0; i < row; i++) {
+     for (int j = 0; j < col; j++) {
+       // keep track of live neighbor count 
+     int liveCnt = 0;
+     for (int k = 0; k < dirs.length; k++) {
+       int x = i + dirs[k][0];
+     int y = j + dirs[k][1];
+     if (x >= 0 && x < row && y >= 0 && y < col) {
+       // get old state from lower bit
+       if (board[x][y] % 2 == 1) {
+         liveCnt++;  
+       }
+     }
+     }
+     if (board[i][j] % 2 == 1) {
+       if (liveCnt == 2 || liveCnt == 3) {
+       board[i][j] += 2;
+     }
+     } else {
+       if (liveCnt == 3) {
+         board[i][j] += 2;
+       }
+      }
+    }    
+    }
+    // update state based on higher bit 
+    for (int i = 0; i < row; i++) {
+    for (int j = 0; j < col; j++) {
+      board[i][j] >>= 1;
+    }
+  }  
+  }        
+        
+/**
+* Given a set of non-overlapping intervals, insert a new interval into the intervals (merge if necessary).
+* 
+* You may assume that the intervals were initially sorted according to their start times.
+* 
+* Example 1:
+* Given intervals [1,3],[6,9], insert and merge [2,5] in as [1,5],[6,9].
+* 
+* Example 2:
+* Given [1,2],[3,5],[6,7],[8,10],[12,16], insert and merge [4,9] in as [1,2],[3,10],[12,16].
+* 
+* This is because the new interval [4,9] overlaps with [3,5],[6,7],[8,10].
+*/        
+ 
+//                [4,  9]
+                       
+//       [1,  2],   [3,  5],  [6,7]  ,[8,10],   [12,16]                       
+//                                               idx              
+// res: {[1,2],   [3,10], [12,16]}                   
+//                     --------------
+//              ----------           
+//              s        t           w  
+// public List<Interval> insert(List<Interval> intervals, Interval newInterval) {
+//     List<Interval> res = new ArrayList<Interval>();
+// if (intervals.size() == 0) {
+//   res.add(newInterval);
+//   return res;
+// }
+// int idx = 0;
+// // 加interval前
+// while (idx < intervals.size() && intervals.get(idx).end < newInterval.start) {
+//   res.add(intervals.get(idx));
+//   idx++;
+// }
+// // *****加入interval （merge）
+// if (idx < intervals.size()) {
+//   newInterval.start = Math.min(newInterval.start, intervals.get(idx).start);
+// }
+// res.add(newInterval);
+// while (idx < intervals.size() && intervals.get(idx).start <= newInterval.end) {
+//   newInterval.end = Math.max(newInterval.end, intervals.get(idx).end);
+//   idx++;
+// }
+// // 加了interval后
+// while (idx < intervals.size()) {
+//   res.add(intervals.get(idx));
+//   idx++;
+// }
+// return res;
+// }  
+            
+ 
+/**
+* Given an unsorted array of integers, find the length of the longest consecutive elements sequence.
+* 
+* For example,
+* Given [100, 4, 200, 1, 3, 2],
+* The longest consecutive elements sequence is [1, 2, 3, 4]. Return its length: 4.
+* 
+* Your algorithm should run in O(n) complexity.
+*/
+ 
+100 len = 1  bigger = 101 smaller = 99
+4  len = 4 bigger = 5 samller = 3 maxLEN = 4                       
+set: 100, 4, 200,                    
+                       
+                       
+                       
+public int longestConsecutive(int[] nums) {
+  if (nums == null || nums.length == 0) return 0;
+  int maxLen = 1;
+  Set<Integer> set = new HashSet<Integer>();
+  for (int i = 0; i < nums.length; i++) {
+    set.add(nums[i]);
+  }
+  for (int i = 0; i < nums.length; i++) {
+    if (set.isEmpty()) break;
+    int len = 1;
+    int bigger = nums[i] + 1;
+    set.remove(nums[i]);
+    while (set.contains(bigger)) {
+      len++;
+      set.remove(bigger++);        
+    }
+    int smaller = nums[i] - 1;
+    while (set.contains(smaller)) {
+      len++;
+      set.remove(smaller--);
+    }
+    if (len > maxLen) {
+      maxLen = len;
+    }
+  }
+  return maxLen;    
+} 
+ 
+                      
+        
+/**
+* Given an array of size n, find the majority element. The majority element is the element that appears more than n/2 times.
+* 
+* You may assume that the array is non-empty and the majority element always exist in the array.
+*/        
+  3  5  3  2  3     
+              c 
+cnt                       
+                       
+hashMap:
+3 -> 3  -> return 3
+5 -> 1
+2 -> 1                       
+                       
+                       
+                       
+numsLen = len = 5 
+                       
+        
+public class MajorityElement {
+  public int majorityElement(int[] nums) {
+    Map<Integer, Integer> map = new HashMap<Integer, Integer>();
+    int res = 0;
+    for (int num : nums) {
+      if (!map.containsKey(num)) {
+        map.put(num, 1);
+      } else {
+        map.put(num, map.get(num)+1);
+      }
+      if (map.get(num) > nums.length/2) {
+        res = num;
+        break;
+      }
+    }
+    return res;
+  }
+}         
+        
+        
+public int majorityElement(int[] nums) {
+  int candidate = nums[0], cnt = 0;
+  for(int i = 1; i < nums.length; i++){
+    if(candidate == nums[i]){
+      cnt++;
+    } else if(cnt==0){
+      candidate = nums[i];
+    } else {
+      cnt--;
+    }
+  }
+  return candidate;
+} 
+            
+              
+        
+/**
+* Given an integer array of size n, find all elements that appear more than n/3 times. The algorithm should run in linear time and in O(1) space.
+*/        
+                             i     
+   3     5     3     2       3
+   p1                       
+   p2
+                       
+1 - 3
+2 - 3                  
+cnt1 1                   
+cnt2 1
+ 
+1 - 3
+2 - 3                  
+cnt1 0                   
+cnt2 0                       
+                       
+1 - 3
+2 - 3                  
+cnt1 1                   
+cnt2 1
+                       
+1 - 3
+2 - 3                  
+cnt1 0                   
+cnt2 0                       
+                       
+1 - 3
+2 - 3                  
+cnt1 1                   
+cnt2 1                       
+                       
+  public List<Integer> majorityElement(int[] nums) {
+    List<Integer> res = new ArrayList<Integer>();
+    if(nums.length == 0 || nums == null) return res;
+    int cnt1 = 0;
+    int cnt2 = 0;
+    int item1 = nums[0];
+    int item2 = nums[0];
+    for (int i = 0; i < nums.length; i++) {
+      // if nums[i] equals one of items, then increment corresponding counter
+      if (nums[i] == item1) {
+        cnt1++;
+      } else if(nums[i] == item2) {
+        cnt2++;
+      // if neither of items equals nums[i], decrement bother counter 
+      } else if(cnt1 != 0 && cnt2 != 0) {
+        cnt1--;
+        cnt2--;
+      // if one of counter is 0, then update cooresponding item
+      } else {
+        if(cnt1 == 0) {
+          item1 = nums[i];
+          cnt1 = 1;
+        } else {
+          item2 = nums[i];
+          cnt2 = 1;
+        }
+      }
+    }
+    cnt1 = 0;
+    cnt2 = 0;
+    for (int i = 0; i < nums.length; i++) {
+      if (nums[i] == item1) cnt1++;
+      if (nums[i] == item2) cnt2++;
+    }
+    if (cnt1 > nums.length / 3) res.add(item1);
+    if (cnt2 > nums.length / 3 && item2 != item1) res.add(item2);
+    return res;
+  } 
+}
+                    
+/**
+* Given two sorted integer arrays nums1 and nums2, merge nums2 into nums1 as one sorted array.
+* 
+* Note:
+* You may assume that nums1 has enough space (size that is greater or equal to m + n) to hold additional elements from nums2. The number of elements initialized in nums1 and nums2 are m and n respectively.
+*/
+  
+         p1          
+                                      m+n-1
+ nums1:1  2  2  4  5  6  4  4   5  5   6   
+                       
+                       
+      p2      
+ nums2:  1 2  4  5  
+public void merge(int[] nums1, int m, int[] nums2, int n) {
+  if (nums1 == null || nums2 == null) return;
+  int idx1 = m - 1;
+  int idx2 = n - 1;
+  int idx = n + m - 1;
+  while (idx1 >= 0 && idx2 >= 0) {
+    if (nums1[idx1] > nums2[idx2]) {
+      nums1[idx--] = nums1[idx1--];
+    } else {
+      nums1[idx--] = nums2[idx2--];
+    }
+  }
+  while (idx2 >= 0) {
+    nums1[idx--] = nums2[idx2--];
+  }
+}        
+ 
+                       
+/**
+* Given an array of n positive integers and a positive integer s, find the minimal length of a contiguous subarray of which the sum ≥ s. If there isn't one, return 0 instead.
+* 
+* For example, given the array [2,3,1,2,4,3] and s = 7,
+* the subarray [4,3] has the minimal length under the problem constraint.
+* 
+* click to show more practice.
+* 
+* More practice:
+* If you have figured out the O(n) solution, try coding another solution of which the time complexity is O(n log n).
+*/                       
+ 
+nums 2,     3,       1,        2,     4,           3 
+                                                   s
+                                                      e
+                       
+sum 3                      
+min 2                       
+s 7                       
+                       
+                       
+public int minSubArrayLen(int s, int[] nums) {
+  int start = 0;
+  int end = 0;
+  int sum = 0;
+  int min = Integer.MAX_VALUE;
+  
+  while (start < nums.length && end < nums.length) {
+    while (sum < s && end < nums.length) {
+      sum += nums[end++];
+    }
+    
+    while (sum >= s && start <= end) {
+      min = Math.min(min, end-start);
+      sum -= nums[start++];
+    }
+  }
+  return min == Integer.MAX_VALUE ? 0 : min;
+}
+                       
+/**
+废题
+* Implement next permutation, which rearranges numbers into the lexicographically next greater permutation of numbers.
+* 
+* If such arrangement is not possible, it must rearrange it as the lowest possible order (ie, sorted in ascending order).
+* 
+* The replacement must be in-place, do not allocate extra memory.
+* 
+* Here are some examples. Inputs are in the left-hand column and its corresponding outputs are in the right-hand column.
+* 1,2,3 → 1,3,2
+* 3,2,1 → 1,2,3
+* 1,1,5 → 1,5,1
+*/      
+        
+public void nextPermutation(int[] nums) {
+  if (nums == null || nums.length == 0) return;
+  int idx = nums.length - 1;
+  while (idx > 0) {
+    if (nums[idx-1] < nums[idx]) break;
+    idx--;
+  }    
+  if (idx > 0) {
+    int ptr = nums.length - 1;
+    while (ptr >= 0) {
+      if (nums[ptr] > nums[idx-1]) break;
+      ptr--;
+    }
+    swap(nums, idx-1, ptr);
+  }
+  
+  int right = nums.length - 1;
+  while (idx < right) {
+    swap(nums, idx, right);
+    idx++;
+    right--;
+  }
+}
+ 
+private void swap(int[] nums, int i, int j) {
+  int tmp = nums[i];
+  nums[i] = nums[j];
+  nums[j] = tmp;
+}
+        
+/**
+* Given numRows, generate the first numRows of Pascal's triangle.
+* 
+* For example, given numRows = 5,
+* Return
+* 
+* [
+*      [1],
+*     [1,1],
+*    [1,2,1],
+*   [1,3,3,1],
+*  [1,4,6,4,1]
+* ]
+*/        
+ 
+1           
+1    1
+1    2     1
+1    3     3     1
+1    4     6     4      1
+                       
+public List<List<Integer>> generate(int numRows) {
+  List<List<Integer>> res = new ArrayList<List<Integer>>();
+  if (numRows <= 0) {
+    return res;
+  }
+  List<Integer> pre = new ArrayList<Integer>();
+  pre.add(1);
+  res.add(pre);
+  for (int i = 2; i <= numRows; i++) {
+    List<Integer> cur = new ArrayList<Integer>();
+    cur.add(1);
+    for (int j = 0; j < pre.size() - 1; j++){
+      cur.add(pre.get(j)+pre.get(j+1));
+    }
+    cur.add(1);
+    res.add(cur);
+    pre = cur;
+  }
+  return res;
+}                       
+ 
+/**
+* Given an index k, return the kth row of the Pascal's triangle.
+* 
+* For example, given k = 3,
+* Return [1,3,3,1].
+* 
+* Note:
+* Could you optimize your algorithm to use only O(k) extra space?
+*/
+           
+     j     
+          j+1 
+1    3     3(6)  1(4)
+                       
+1    4     6     4      1   
+           i            
+                       
+public List<Integer> getRow(int rowIndex) {
+  List<Integer> res = new ArrayList<Integer>();
+  if (rowIndex < 0) {
+    return res;
+  }
+  res.add(1);
+  for (int i = 1; i <= rowIndex; i++) {
+    for (int j = res.size() - 2; j >= 0; j--) {
+      res.set(j+1, res.get(j)+res.get(j+1));
+    }
+    res.add(1);
+  }
+  return res;
+}
+                       
+/**
+* Given a non-negative integer represented as a non-empty array of digits, plus one to the integer.
+* 
+* You may assume the integer do not contain any leading zero, except the number 0 itself.
+* 
+* The digits are stored such that the most significant digit is at the head of the list.
+*/          
+    (1)  
+        9  9  9  9                  
+    
+     i
+ 
+carry = 1
+                       
+public int[] plusOne(int[] digits) {
+  if (digits == null || digits.length == 0) {
+    return digits;
+  }
+  int carry = 1;
+  for (int i = digits.length - 1; i >= 0; i--) {
+    int digit = (digits[i] + carry) % 10;
+    carry = (digits[i] + carry) / 10;
+    digits[i] = digit;
+    if (carry == 0) {
+      return digits;
+    }
+  }
+  int[] res = new int[digits.length+1];
+  res[0] = 1;
+  return res;
+}                       
+                       
+                       
+/**
+* Given an array of n integers where n > 1, nums, return an array output such that output[i] is equal to the product of all the elements of nums except nums[i].
+* 
+* Solve it without division and in O(n).
+* 
+* For example, given [1,2,3,4], return [24,12,8,6].
+* 
+* Follow up:
+* Could you solve it with constant space complexity? (Note: The output array does not count as extra space for the purpose of space complexity analysis.)
+*/
+ 
+nums : 1,   2,    3,     4                       
+ 
+left 
+right
+res:   1,   1,    2,     6
+res:  24    12    8      6                  
+               =8        
+return: 24 12 8 6                       
+                       
+public int[] productExceptSelf(int[] nums) {
+  if (nums == null || nums.length == 0) return nums;
+  int len = nums.length;
+  int[] res = new int[len];
+  int left = 1;
+  for (int i = 0; i < len; i++) {
+    res[i] = left;
+    left *= nums[i];
+  }
+  int right = 1;
+  for (int i = len-1; i >= 0; i--) {
+    res[i] *= right;
+    right *= nums[i];    
+  }
+  return res;    
+}                       
+                       
+/**
+* Rotate an array of n elements to the right by k steps.
+* 
+* For example, with n = 7 and k = 3, the array [1,2,3,4,5,6,7] is rotated to [5,6,7,1,2,3,4].
+* 
+* Note:
+* Try to come up as many solutions as you can, there are at least 3 different ways to solve this problem.
+*/
+ 
+(curIdx + k) % len
+ 
+思路
+通过三次反转，我们可以很巧妙的实现旋转数组。首先我们将整个数组反转，然后将前k个数字反转，然后再将后面剩下的数字反转，就得到目标数组了。
+ 
+注意
+反转数组最简单的方法是交换元素，而交换元素有至少三种方法（临时变量，相加相减，异或）
+k可能大于数组长度，旋转不止一次，所以我们要先对k取余
+ 
+follow up: 
+如果是向左旋转k位而不是向右呢？
+左旋时，我们是将其后k个单独反转，然后前面的单独反转。
+                       
+public void rotate(int[] nums, int k) {
+  if (nums == null || nums.length == 0 || k == 0) return;
+  k %= nums.length; // k may be larger that the length of nums
+  reverse(nums, 0, nums.length-1);
+  reverse(nums, 0, k-1);
+  reverse(nums, k, nums.length-1);  
+}
+ 
+private void reverse(int[] nums, int i, int j) {
+  while (i < j) {
+    swap(nums, i, j);
+    i++;
+    j--;
+  }
+}
+ 
+private void swap(int[] nums, int i, int j) {
+  int tmp = nums[i];
+  nums[i] = nums[j];
+  nums[j] = tmp;
+}                       
+                       
+  
