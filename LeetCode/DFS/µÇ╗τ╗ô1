@@ -20,6 +20,7 @@ private void dfs(int[] nums, int target, int offset, ArrayList<ArrayList<Integer
     else if (target == 0) {
         // have to create a new ArrayList
         result.add(new ArrayList<Integer>(tmp));
+        //树的临界条件可能需要再remove tmp最后一格 参考path sum II
         return;
     } 
     else {
