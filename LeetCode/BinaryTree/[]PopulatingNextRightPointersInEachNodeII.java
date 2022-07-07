@@ -19,7 +19,39 @@ After calling your function, the tree should look like:
   2 -> 3 -> NULL
  / \    \
 4-> 5 -> 7 -> NULL
+
 原题链接
+
+
+
+
+BFS
+
+class Solution {
+    public Node connect(Node root) {
+        Queue<Node> q = new LinkedList<Node>();
+        if (root == null) return null;
+        q.offer(root);
+        while (!q.isEmpty()) {
+            int size = q.size();
+            for (int i = 0; i < size; i++) {
+                Node cur = q.poll();
+                if (i < size - 1) {
+                    cur.next = q.peek();
+                }
+                if (cur.left != null) q.offer(cur.left);
+                if (cur.right != null) q.offer(cur.right);
+            }
+        }
+        return root;
+    }
+}
+
+
+
+
+
+
 
 递归法
 复杂度
